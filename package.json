@@ -1,0 +1,17 @@
+{
+  "name": "fullstack-web-project",
+  "version": "1.0.0",
+  "description": "Full-stack application built with Next.js, React, Node.js, Express, and TypeScript",
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"magenta.bold,cyan.bold\" \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build": "npm run build:server && npm run build:client",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
