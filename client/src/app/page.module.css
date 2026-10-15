@@ -1,0 +1,434 @@
+.pageContainer {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-white);
+}
+
+/* Post-Login Blank Screen */
+.blankLoggedScreen {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loggedText {
+  font-size: 1.35rem;
+  color: var(--color-black);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.logoutBtn {
+  padding: 0.65rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-slate-700);
+  background-color: var(--color-slate-100);
+  border: 1px solid var(--color-slate-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.logoutBtn:hover {
+  background-color: var(--color-slate-200);
+  color: var(--color-black);
+}
+
+/* Left Half - Showcase Pane (Blank for images) */
+.leftSection {
+  flex: 1.1;
+  min-height: 100vh;
+  background-color: #0d1117;
+  border-right: 1px solid var(--color-slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.leftBlankCanvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem;
+  max-width: 440px;
+}
+
+.leftCanvasTitle {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.leftCanvasSub {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* Right Half - Professional Login Section */
+.rightSection {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 3rem;
+  background-color: var(--color-white);
+}
+
+.formCard {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header & Official Logo */
+.headerBlock {
+  margin-bottom: 2.25rem;
+}
+
+.institutionHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.logoImage {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.institutionText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.institutionName {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-black);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.portalBadge {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--lpu-orange);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mainTitle {
+  font-size: 2.1rem;
+  font-weight: 600;
+  color: var(--color-black);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.02rem;
+  color: var(--color-slate-600);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Form Layout */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fieldLabel {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-slate-800);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.requiredStar {
+  color: #dc2626;
+  margin-left: 3px;
+  font-weight: 500;
+}
+
+.labelDetail {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-slate-500);
+}
+
+/* Inputs & Select */
+.selectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.selectField {
+  width: 100%;
+  height: 52px;
+  padding: 0 2.75rem 0 1.15rem;
+  font-size: 1.02rem;
+  font-weight: 400;
+  color: var(--color-black);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-slate-300);
+  border-radius: var(--radius-md);
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.selectField:focus {
+  outline: none;
+  border-color: var(--lpu-orange);
+  box-shadow: 0 0 0 3px rgba(243, 111, 33, 0.18);
+}
+
+.selectChevron {
+  position: absolute;
+  right: 1.15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-slate-500);
+  display: flex;
+  align-items: center;
+}
+
+.inputField {
+  width: 100%;
+  height: 52px;
+  padding: 0 1.15rem;
+  font-size: 1.02rem;
+  font-weight: 400;
+  color: var(--color-black);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-slate-300);
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inputField::placeholder {
+  color: var(--color-slate-400);
+  font-weight: 400;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: var(--lpu-orange);
+  box-shadow: 0 0 0 3px rgba(243, 111, 33, 0.18);
+}
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInput {
+  padding-right: 3.25rem;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.75rem;
+  height: 38px;
+  width: 38px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-slate-500);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.passwordToggle:hover {
+  color: var(--color-black);
+}
+
+/* Auxiliary controls */
+.auxRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  padding-top: 0.25rem;
+}
+
+.rememberLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-slate-700);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 400;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--lpu-orange);
+  cursor: pointer;
+}
+
+.forgotLink {
+  color: var(--lpu-orange);
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.forgotLink:hover {
+  color: var(--lpu-orange-dark);
+  text-decoration: underline;
+}
+
+/* Submit Action Button */
+.submitButton {
+  margin-top: 0.75rem;
+  width: 100%;
+  height: 52px;
+  background-color: var(--lpu-orange);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  transition: background-color 0.15s ease;
+}
+
+.submitButton:hover {
+  background-color: var(--lpu-orange-dark);
+}
+
+.submitButton:active {
+  background-color: #bf4907;
+}
+
+.submitButton:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* Feedback message */
+.feedbackMessage {
+  padding: 0.85rem 1.15rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.feedbackSuccess {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.feedbackError {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.feedbackWarning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* Demo Credentials Hint Box */
+.demoHintBox {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  background-color: var(--color-slate-50);
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  color: var(--color-slate-600);
+  line-height: 1.5;
+}
+
+.demoHintTitle {
+  font-weight: 600;
+  color: var(--color-slate-800);
+  margin-bottom: 0.25rem;
+}
+
+/* Footer Note */
+.footerArea {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-slate-200);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--color-slate-500);
+}
+
+.footerContact {
+  color: var(--color-slate-700);
+}
+
+.footerContact a {
+  color: var(--lpu-orange);
+  font-weight: 500;
+}
+
+.footerContact a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive behavior */
+@media (max-width: 992px) {
+  .leftSection {
+    display: none;
+  }
+  .rightSection {
+    padding: 3rem 1.75rem;
+  }
+}
