@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useId } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./page.module.css";
 
@@ -57,7 +58,7 @@ interface AuthenticatedSession {
 
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>("Student");
-  const [userId, setUserId] = useState<string>("12204918");
+  const [userId, setUserId] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
@@ -68,6 +69,7 @@ export default function LoginPage() {
   // Authenticated state
   const [loggedInUser, setLoggedInUser] = useState<AuthenticatedSession | null>(null);
 
+  const router = useRouter();
   const roleSelectId = useId();
   const userIdInputId = useId();
   const passwordInputId = useId();
@@ -75,7 +77,6 @@ export default function LoginPage() {
   // Role selection change helper
   const handleRoleChange = (newRole: UserRole) => {
     setSelectedRole(newRole);
-    setUserId(ROLE_DETAILS[newRole].defaultId);
     setErrorMessage(null);
   };
 
@@ -126,6 +127,11 @@ export default function LoginPage() {
         } else {
           sessionStorage.setItem("lpu_mess_jwt", data.token);
         }
+      }
+
+      if (data.user.role === "Student") {
+        router.push("/student/dashboard");
+        return;
       }
 
       setLoggedInUser({
@@ -381,20 +387,6 @@ export default function LoginPage() {
               {isSubmitting ? "Logging In..." : `Login as ${selectedRole}`}
             </button>
           </form>
-
-          {/* Test Credentials Helper Card */}
-          <div className={styles.demoHintBox}>
-            <div className={styles.demoHintTitle}>Default Credentials (All roles password: password123)</div>
-            <p>
-              <strong>Student:</strong> 12204918 &bull; <strong>Kitchen:</strong> KS-304 &bull; <strong>Manager:</strong> MM-108
-            </p>
-            <p>
-              <strong>Mess Admin:</strong> MA-201 &bull; <strong>Finance:</strong> FO-502 &bull; <strong>Admin:</strong> admin
-            </p>
-            <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "0.25rem" }}>
-              * Try selecting a role that doesn&apos;t match the User ID to see the RBAC block in action!
-            </p>
-          </div>
 
           {/* Institutional Footer */}
           <footer className={styles.footerArea}>

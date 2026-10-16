@@ -380,24 +380,6 @@
   border: 1px solid #fde68a;
 }
 
-/* Demo Credentials Hint Box */
-.demoHintBox {
-  margin-top: 1rem;
-  padding: 0.85rem 1rem;
-  background-color: var(--color-slate-50);
-  border: 1px solid var(--color-slate-200);
-  border-radius: var(--radius-md);
-  font-size: 0.85rem;
-  color: var(--color-slate-600);
-  line-height: 1.5;
-}
-
-.demoHintTitle {
-  font-weight: 600;
-  color: var(--color-slate-800);
-  margin-bottom: 0.25rem;
-}
-
 /* Footer Note */
 .footerArea {
   margin-top: 2.5rem;
@@ -423,12 +405,127 @@
   text-decoration: underline;
 }
 
-/* Responsive behavior */
-@media (max-width: 992px) {
+/* Responsive Breakpoints for Laptops, Tablets, and Mobile Phones */
+
+/* 1. Laptops and Landscape Tablets (992px to 1199px) */
+@media (max-width: 1199px) and (min-width: 992px) {
+  .rightSection {
+    padding: 3rem 2rem;
+  }
+  .formCard {
+    max-width: 460px;
+  }
+  .mainTitle {
+    font-size: 1.85rem;
+  }
+}
+
+/* 2. Portrait Tablets (768px to 991px) */
+@media (max-width: 991px) {
   .leftSection {
     display: none;
   }
   .rightSection {
-    padding: 3rem 1.75rem;
+    flex: 1;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 3.5rem 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .formCard {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .mainTitle {
+    font-size: 1.95rem;
+  }
+}
+
+/* 3. Mobile Phones (< 768px) */
+@media (max-width: 767px) {
+  .pageContainer {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .rightSection {
+    padding: 2rem 1.25rem;
+    align-items: flex-start;
+  }
+  .formCard {
+    max-width: 100%;
+  }
+  .headerBlock {
+    margin-bottom: 1.6rem;
+  }
+  .institutionHeader {
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .logoImage {
+    width: 52px;
+    height: 52px;
+  }
+  .institutionName {
+    font-size: 1rem;
+  }
+  .portalBadge {
+    font-size: 0.78rem;
+  }
+  .mainTitle {
+    font-size: 1.65rem;
+    margin-bottom: 0.35rem;
+  }
+  .subtitle {
+    font-size: 0.92rem;
+  }
+  .form {
+    gap: 1.25rem;
+  }
+  .selectField,
+  .inputField {
+    height: 48px;
+    font-size: 1rem; /* 16px base prevents mobile browser zoom */
+  }
+  .submitButton {
+    height: 48px;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
+  .auxRow {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+  }
+  .footerArea {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    font-size: 0.82rem;
+    text-align: center;
+  }
+}
+
+/* 4. Small Mobile Phones (< 380px) */
+@media (max-width: 380px) {
+  .rightSection {
+    padding: 1.5rem 1rem;
+  }
+  .logoImage {
+    width: 44px;
+    height: 44px;
+  }
+  .institutionName {
+    font-size: 0.9rem;
+  }
+  .mainTitle {
+    font-size: 1.5rem;
+  }
+  .auxRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 }
