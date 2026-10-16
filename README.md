@@ -4,7 +4,7 @@ A modern full-stack web application built for Lovely Professional University to 
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 ### Description
 Forecasts attendance for each meal service using historical attendance and calendar context, converts the forecast into preparation and ingredient quantities via recipe data, captures post-service actuals – prepared, served, leftover – and reports waste quantity and cost with forecast-accuracy feedback.
@@ -25,7 +25,7 @@ Measurable reduction in avoidable waste, a documented cost saving, and a plannin
 
 ---
 
-## 🏗 Project Architecture
+## Project Architecture
 
 ```text
 ├── client/                     # Next.js 15+ Frontend (React 19, TypeScript)
@@ -52,7 +52,7 @@ Measurable reduction in avoidable waste, a documented cost saving, and a plannin
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Run Both Frontend and Backend Concurrently
 From the project root directory, run:
@@ -65,7 +65,7 @@ npm run dev
 
 ---
 
-## 🛠 Available Scripts (Root)
+## Available Scripts (Root)
 
 | Command | Description |
 |---|---|
@@ -79,7 +79,7 @@ npm run dev
 
 ---
 
-## 🔐 Default Test Credentials (Password: `password123`)
+## Default Test Credentials (Password: `password123`)
 
 | Role | User ID | Password | Scope |
 |---|---|---|---|
