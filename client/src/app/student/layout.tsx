@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -146,6 +146,66 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+interface SearchOption {
+  title: string;
+  category: string;
+  href: string;
+  keywords: string[];
+}
+
+const SEARCH_OPTIONS: SearchOption[] = [
+  { title: "Weekly Menu", category: "Dining", href: "/student/menu", keywords: ["food", "thali", "breakfast", "lunch", "dinner", "snacks", "menu", "today", "sat", "sun"] },
+  { title: "Access Meal (QR)", category: "Dining", href: "/student/access-meal", keywords: ["qr", "token", "scan", "entry", "eat", "coupon", "code"] },
+  { title: "Meal History", category: "Records", href: "/student/history", keywords: ["past", "logs", "previous", "attendance", "records", "consumed"] },
+  { title: "Meal Analytics", category: "Insights", href: "/student/analytics", keywords: ["stats", "nutrition", "calories", "charts", "consumption"] },
+  { title: "Student Dashboard", category: "Overview", href: "/student/dashboard", keywords: ["home", "overview", "summary", "main"] },
+  { title: "Notifications", category: "Alerts", href: "/student/notifications", keywords: ["alerts", "updates", "announcements", "bell"] },
+  { title: "Mess Feedback", category: "Support", href: "/student/feedback", keywords: ["rating", "review", "taste", "hygiene"] },
+  { title: "Raise Complaints", category: "Support", href: "/student/complaints", keywords: ["issue", "report", "grievance", "problem", "ticket"] },
+  { title: "Change Mess", category: "Services", href: "/student/change-mess", keywords: ["switch", "transfer", "hostel", "mess change"] },
+  { title: "Student Profile", category: "Account", href: "/student/profile", keywords: ["user", "account", "details", "registration", "tharun"] },
+  { title: "Settings", category: "Account", href: "/student/settings", keywords: ["preferences", "password", "theme", "config"] },
+];
+
+const SAMPLE_NOTIFICATIONS = [
+  {
+    id: "1",
+    title: "Special Sunday Dinner Treat",
+    body: "Paneer Butter Masala & Gulab Jamun scheduled for Sunday dinner.",
+    time: "10m ago",
+    unread: true,
+  },
+  {
+    id: "2",
+    title: "Mess Rebate Credited",
+    body: "Rebate of ₹450 for Oct 12–14 has been credited to your mess account.",
+    time: "2h ago",
+    unread: true,
+  },
+  {
+    id: "3",
+    title: "Breakfast Service Timings",
+    body: "Breakfast counter will operate from 07:30 AM to 09:30 AM in all messes.",
+    time: "Yesterday",
+    unread: false,
+  },
+];
+
+const PAGE_TITLES: Record<string, string> = {
+  "/student": "Dashboard",
+  "/student/dashboard": "Dashboard",
+  "/student/menu": "Menu",
+  "/student/access-meal": "Access Meal",
+  "/student/history": "Meal History",
+  "/student/analytics": "Meal Analytics",
+  "/student/notifications": "Notifications",
+  "/student/feedback": "Feedback",
+  "/student/complaints": "Raise Complaints",
+  "/student/change-mess": "Change Mess",
+  "/student/profile": "Profile",
+  "/student/settings": "Settings",
+};
+
 export default function StudentLayout({
   children,
 }: {
@@ -153,8 +213,54 @@ export default function StudentLayout({
 }) {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  const pageHeading = PAGE_TITLES[pathname] || "Dashboard";
+
+  // Quick search filtering
+  const filteredSearchItems = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase().trim();
+    return SEARCH_OPTIONS.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        item.keywords.some((k) => k.toLowerCase().includes(q))
+    ).slice(0, 5);
+  }, [searchQuery]);
+
+  // Keyboard shortcut Ctrl+K to focus search and Escape to dismiss popups
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setIsSearchOpen(true);
+      }
+      if (e.key === "Escape") {
+        setIsNotificationOpen(false);
+        setIsProfileOpen(false);
+        setIsSearchOpen(false);
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Close dropdowns on route changes
+  useEffect(() => {
+    setIsNotificationOpen(false);
+    setIsProfileOpen(false);
+    setIsSearchOpen(false);
+  }, [pathname]);
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
@@ -341,8 +447,259 @@ export default function StudentLayout({
         </div>
       </aside>
 
-      {/* Main Content Area: Pure White Blank Pages */}
+      {/* Main Content Area */}
       <main className={styles.contentArea}>
+        {/* Top Navigation Bar */}
+        <header className={styles.topNavbar}>
+          {/* Left: Active Page Heading */}
+          <div className={styles.topNavLeft}>
+            <h1 className={styles.topNavPageTitle}>{pageHeading}</h1>
+          </div>
+
+          {/* Right: Modern Search Bar, Notification Icon, Profile Icon */}
+          <div className={styles.topNavRight}>
+            {/* 1. Modern Search Bar */}
+            <div className={styles.searchBarWrapper}>
+              <span className={styles.searchIcon} aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </span>
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search menu, meals..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onFocus={() => setIsSearchOpen(true)}
+                className={styles.searchInput}
+                aria-label="Search meals, services, and pages"
+                id="student-top-search-input"
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setIsSearchOpen(false);
+                  }}
+                  className={styles.searchClearBtn}
+                  aria-label="Clear search input"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              ) : (
+                <span className={styles.searchShortcutPill}>Ctrl K</span>
+              )}
+
+              {/* Quick Search Dropdown Filter Results */}
+              {isSearchOpen && searchQuery.trim().length > 0 && (
+                <div className={styles.searchResultsDropdown}>
+                  {filteredSearchItems.length > 0 ? (
+                    filteredSearchItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => {
+                          setSearchQuery("");
+                          setIsSearchOpen(false);
+                        }}
+                        className={styles.searchResultItem}
+                      >
+                        <span className={styles.searchResultIcon}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </span>
+                        <div>
+                          <div className={styles.searchResultTitle}>{item.title}</div>
+                          <div className={styles.searchResultCategory}>{item.category}</div>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className={styles.noSearchResults}>
+                      No matches found for &ldquo;{searchQuery}&rdquo;
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 2. Notification Icon Button & Dropdown */}
+            <div className={styles.navActionGroup}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsNotificationOpen(!isNotificationOpen);
+                  setIsProfileOpen(false);
+                  setIsSearchOpen(false);
+                }}
+                className={styles.notificationBtn}
+                id="top-notification-btn"
+                aria-label="View notifications"
+                aria-expanded={isNotificationOpen}
+                title="Notifications (2 unread)"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                  <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                </svg>
+                <span className={styles.notificationDot} />
+              </button>
+
+              {isNotificationOpen && (
+                <div className={styles.notificationDropdown}>
+                  <div className={styles.dropdownHeader}>
+                    <span className={styles.dropdownTitle}>Notifications</span>
+                    <span className={styles.dropdownBadge}>2 New</span>
+                  </div>
+                  <div className={styles.notificationList}>
+                    {SAMPLE_NOTIFICATIONS.map((notif) => (
+                      <div
+                        key={notif.id}
+                        className={styles.notificationItem}
+                        onClick={() => {
+                          setIsNotificationOpen(false);
+                          router.push("/student/notifications");
+                        }}
+                      >
+                        <div className={styles.notificationItemTitle}>{notif.title}</div>
+                        <div className={styles.notificationItemBody}>{notif.body}</div>
+                        <div className={styles.notificationItemTime}>{notif.time}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    href="/student/notifications"
+                    onClick={() => setIsNotificationOpen(false)}
+                    className={styles.dropdownFooterLink}
+                  >
+                    View All Notifications →
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Profile Icon Button & Dropdown */}
+            <div className={styles.navActionGroup}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileOpen(!isProfileOpen);
+                  setIsNotificationOpen(false);
+                  setIsSearchOpen(false);
+                }}
+                className={styles.profileBtn}
+                id="top-profile-btn"
+                aria-label="Student profile menu"
+                aria-expanded={isProfileOpen}
+                title="Profile (TN)"
+              >
+                <div className={styles.profileAvatar}>TN</div>
+              </button>
+
+              {isProfileOpen && (
+                <div className={styles.profileDropdown}>
+                  <div className={styles.profileDropdownHeader}>
+                    <span className={styles.dropdownUserName}>Tharun Neela</span>
+                    <span className={styles.dropdownUserReg}>12204918 • Hostel BH-4</span>
+                  </div>
+
+                  <div className={styles.profileDropdownLinks}>
+                    <Link
+                      href="/student/profile"
+                      onClick={() => setIsProfileOpen(false)}
+                      className={styles.profileDropdownLink}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                      <span>Student Profile</span>
+                    </Link>
+
+                    <Link
+                      href="/student/settings"
+                      onClick={() => setIsProfileOpen(false)}
+                      className={styles.profileDropdownLink}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                      </svg>
+                      <span>Settings</span>
+                    </Link>
+
+                    <Link
+                      href="/student/change-mess"
+                      onClick={() => setIsProfileOpen(false)}
+                      className={styles.profileDropdownLink}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m16 3 4 4-4 4" />
+                        <path d="M20 7H4" />
+                        <path d="m8 21-4-4 4-4" />
+                        <path d="M4 17h16" />
+                      </svg>
+                      <span>Change Mess</span>
+                    </Link>
+
+                    <Link
+                      href="/student/history"
+                      onClick={() => setIsProfileOpen(false)}
+                      className={styles.profileDropdownLink}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                        <path d="M3 3v5h5" />
+                        <polyline points="12 7 12 12 15 15" />
+                      </svg>
+                      <span>Meal History</span>
+                    </Link>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      handleLogout();
+                    }}
+                    className={styles.dropdownLogoutBtn}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Global Backdrop for closing open dropdowns */}
+        {(isNotificationOpen || isProfileOpen || (isSearchOpen && searchQuery.trim().length > 0)) && (
+          <div
+            className={styles.dropdownBackdrop}
+            onClick={() => {
+              setIsNotificationOpen(false);
+              setIsProfileOpen(false);
+              setIsSearchOpen(false);
+            }}
+            aria-hidden="true"
+          />
+        )}
+
         {children}
       </main>
     </div>
