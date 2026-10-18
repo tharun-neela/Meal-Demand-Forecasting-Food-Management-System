@@ -120,12 +120,17 @@ export default function LoginPage() {
         throw new Error(data.message || "Authentication failed.");
       }
 
-      // Store JWT token for subsequent RBAC requests
+      // Store JWT token for subsequent RBAC requests and Next.js middleware protection
       if (data.token) {
         if (rememberMe) {
           localStorage.setItem("lpu_mess_jwt", data.token);
+          localStorage.setItem("lpu_mess_remember", "true");
+          document.cookie = `lpu_mess_jwt=${data.token}; path=/; max-age=604800; SameSite=Lax`;
         } else {
           sessionStorage.setItem("lpu_mess_jwt", data.token);
+          localStorage.removeItem("lpu_mess_jwt");
+          localStorage.removeItem("lpu_mess_remember");
+          document.cookie = `lpu_mess_jwt=${data.token}; path=/; SameSite=Lax`;
         }
       }
 
@@ -151,6 +156,8 @@ export default function LoginPage() {
   const handleLogout = () => {
     sessionStorage.removeItem("lpu_mess_jwt");
     localStorage.removeItem("lpu_mess_jwt");
+    localStorage.removeItem("lpu_mess_remember");
+    document.cookie = "lpu_mess_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     setLoggedInUser(null);
     setPassword("");
     setErrorMessage(null);

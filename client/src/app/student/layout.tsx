@@ -170,23 +170,34 @@ const SEARCH_OPTIONS: SearchOption[] = [
 const SAMPLE_NOTIFICATIONS = [
   {
     id: "1",
-    title: "Special Sunday Dinner Treat",
-    body: "Paneer Butter Masala & Gulab Jamun scheduled for Sunday dinner.",
+    category: "menu",
+    title: "Today's lunch menu is published!",
+    body: "Rice, dal, roti and paneer curry. Check the full menu before lunch.",
     time: "10m ago",
     unread: true,
   },
   {
     id: "2",
-    title: "Mess Rebate Credited",
-    body: "Rebate of ₹450 for Oct 12–14 has been credited to your mess account.",
-    time: "2h ago",
+    category: "timing",
+    title: "Lunch starts in 15 minutes",
+    body: "Lunch service is scheduled from 12:00 PM to 2:00 PM.",
+    time: "25m ago",
     unread: true,
   },
   {
     id: "3",
-    title: "Breakfast Service Timings",
-    body: "Breakfast counter will operate from 07:30 AM to 09:30 AM in all messes.",
-    time: "Yesterday",
+    category: "attendance",
+    title: "Lunch attendance recorded",
+    body: "Your attendance for today's lunch has been recorded successfully.",
+    time: "Today, 12:42 PM",
+    unread: false,
+  },
+  {
+    id: "4",
+    category: "announcement",
+    title: "Dinner timing updated",
+    body: "Today's dinner service will begin at 7:30 PM instead of 7:00 PM.",
+    time: "2h ago",
     unread: false,
   },
 ];
@@ -262,16 +273,69 @@ export default function StudentLayout({
     setIsSearchOpen(false);
   }, [pathname]);
 
+  // Authentication guard for student portal
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      if (typeof window === "undefined") return;
+
+      const isRemembered = localStorage.getItem("lpu_mess_remember") === "true";
+      const token =
+        sessionStorage.getItem("lpu_mess_jwt") ||
+        (isRemembered ? localStorage.getItem("lpu_mess_jwt") : null);
+
+      if (!token) {
+        setIsAuthorized(false);
+        document.cookie = "lpu_mess_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        sessionStorage.removeItem("lpu_mess_jwt");
+        localStorage.removeItem("lpu_mess_jwt");
+        localStorage.removeItem("lpu_mess_remember");
+        router.replace("/");
+        return;
+      }
+
+      // Sync cookie so server/middleware recognizes active session
+      document.cookie = `lpu_mess_jwt=${token}; path=/; SameSite=Lax`;
+      setIsAuthorized(true);
+    };
+
+    checkAuth();
+  }, [pathname, router]);
+
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("lpu_mess_jwt");
       localStorage.removeItem("lpu_mess_jwt");
+      localStorage.removeItem("lpu_mess_remember");
+      document.cookie = "lpu_mess_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
-    router.push("/");
+    router.replace("/");
+  };
+
+  const handleGoToNotifications = () => {
+    if (typeof window !== "undefined") {
+      const isRemembered = localStorage.getItem("lpu_mess_remember") === "true";
+      const token =
+        sessionStorage.getItem("lpu_mess_jwt") ||
+        (isRemembered ? localStorage.getItem("lpu_mess_jwt") : null);
+      if (token) {
+        document.cookie = `lpu_mess_jwt=${token}; path=/; SameSite=Lax`;
+      }
+    }
+    setIsNotificationOpen(false);
   };
 
   return (
     <div className={styles.studentContainer}>
+      {!isAuthorized && (
+        <div className={styles.authGateOverlay} aria-modal="true" role="dialog">
+          <div className={styles.authGateCard}>
+            <div className={styles.authGateSpinner} />
+            <p className={styles.authGateText}>Verifying student authentication...</p>
+          </div>
+        </div>
+      )}
       {/* Mobile Top App Bar (Visible only on screens < 768px) */}
       <header className={styles.mobileHeader}>
         <div className={styles.mobileBrand}>
@@ -501,35 +565,42 @@ export default function StudentLayout({
 
               {/* Quick Search Dropdown Filter Results */}
               {isSearchOpen && searchQuery.trim().length > 0 && (
-                <div className={styles.searchResultsDropdown}>
-                  {filteredSearchItems.length > 0 ? (
-                    filteredSearchItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => {
-                          setSearchQuery("");
-                          setIsSearchOpen(false);
-                        }}
-                        className={styles.searchResultItem}
-                      >
-                        <span className={styles.searchResultIcon}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 18 15 12 9 6" />
-                          </svg>
-                        </span>
-                        <div>
-                          <div className={styles.searchResultTitle}>{item.title}</div>
-                          <div className={styles.searchResultCategory}>{item.category}</div>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className={styles.noSearchResults}>
-                      No matches found for &ldquo;{searchQuery}&rdquo;
-                    </div>
-                  )}
-                </div>
+                <>
+                  <div
+                    className={styles.dropdownBackdrop}
+                    onClick={() => setIsSearchOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className={styles.searchResultsDropdown}>
+                    {filteredSearchItems.length > 0 ? (
+                      filteredSearchItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => {
+                            setSearchQuery("");
+                            setIsSearchOpen(false);
+                          }}
+                          className={styles.searchResultItem}
+                        >
+                          <span className={styles.searchResultIcon}>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                          </span>
+                          <div>
+                            <div className={styles.searchResultTitle}>{item.title}</div>
+                            <div className={styles.searchResultCategory}>{item.category}</div>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className={styles.noSearchResults}>
+                        No matches found for &ldquo;{searchQuery}&rdquo;
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 
@@ -556,35 +627,47 @@ export default function StudentLayout({
               </button>
 
               {isNotificationOpen && (
-                <div className={styles.notificationDropdown}>
-                  <div className={styles.dropdownHeader}>
-                    <span className={styles.dropdownTitle}>Notifications</span>
-                    <span className={styles.dropdownBadge}>2 New</span>
-                  </div>
-                  <div className={styles.notificationList}>
-                    {SAMPLE_NOTIFICATIONS.map((notif) => (
-                      <div
-                        key={notif.id}
-                        className={styles.notificationItem}
-                        onClick={() => {
-                          setIsNotificationOpen(false);
-                          router.push("/student/notifications");
-                        }}
-                      >
-                        <div className={styles.notificationItemTitle}>{notif.title}</div>
-                        <div className={styles.notificationItemBody}>{notif.body}</div>
-                        <div className={styles.notificationItemTime}>{notif.time}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <Link
-                    href="/student/notifications"
+                <>
+                  <div
+                    className={styles.dropdownBackdrop}
                     onClick={() => setIsNotificationOpen(false)}
-                    className={styles.dropdownFooterLink}
-                  >
-                    View All Notifications →
-                  </Link>
-                </div>
+                    aria-hidden="true"
+                  />
+                  <div className={styles.notificationDropdown}>
+                    <div className={styles.dropdownHeader}>
+                      <span className={styles.dropdownTitle}>Notifications</span>
+                      <span className={styles.dropdownBadge}>2 New</span>
+                    </div>
+                    <div className={styles.notificationList}>
+                      {SAMPLE_NOTIFICATIONS.map((notif) => (
+                        <Link
+                          key={notif.id}
+                          href="/student/notifications"
+                          onClick={handleGoToNotifications}
+                          className={styles.notificationItem}
+                        >
+                          <div className={styles.notificationItemTitle}>{notif.title}</div>
+                          <div className={styles.notificationItemBody}>{notif.body}</div>
+                          <div className={styles.notificationItemTime}>{notif.time}</div>
+                        </Link>
+                      ))}
+                    </div>
+                    <div className={styles.dropdownFooter}>
+                      <Link
+                        href="/student/notifications"
+                        onClick={handleGoToNotifications}
+                        className={styles.dropdownFooterBtn}
+                        id="view-all-notifications-btn"
+                      >
+                        <span>View All Notifications</span>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </Link>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
 
@@ -607,98 +690,92 @@ export default function StudentLayout({
               </button>
 
               {isProfileOpen && (
-                <div className={styles.profileDropdown}>
-                  <div className={styles.profileDropdownHeader}>
-                    <span className={styles.dropdownUserName}>Tharun Neela</span>
-                    <span className={styles.dropdownUserReg}>12204918 • Hostel BH-4</span>
+                <>
+                  <div
+                    className={styles.dropdownBackdrop}
+                    onClick={() => setIsProfileOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className={styles.profileDropdown}>
+                    <div className={styles.profileDropdownHeader}>
+                      <span className={styles.dropdownUserName}>Tharun Neela</span>
+                      <span className={styles.dropdownUserReg}>12204918 • Hostel BH-4</span>
+                    </div>
+
+                    <div className={styles.profileDropdownLinks}>
+                      <Link
+                        href="/student/profile"
+                        onClick={() => setIsProfileOpen(false)}
+                        className={styles.profileDropdownLink}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <span>Student Profile</span>
+                      </Link>
+
+                      <Link
+                        href="/student/settings"
+                        onClick={() => setIsProfileOpen(false)}
+                        className={styles.profileDropdownLink}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="3" />
+                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                        <span>Settings</span>
+                      </Link>
+
+                      <Link
+                        href="/student/change-mess"
+                        onClick={() => setIsProfileOpen(false)}
+                        className={styles.profileDropdownLink}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m16 3 4 4-4 4" />
+                          <path d="M20 7H4" />
+                          <path d="m8 21-4-4 4-4" />
+                          <path d="M4 17h16" />
+                        </svg>
+                        <span>Change Mess</span>
+                      </Link>
+
+                      <Link
+                        href="/student/history"
+                        onClick={() => setIsProfileOpen(false)}
+                        className={styles.profileDropdownLink}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                          <path d="M3 3v5h5" />
+                          <polyline points="12 7 12 12 15 15" />
+                        </svg>
+                        <span>Meal History</span>
+                      </Link>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        handleLogout();
+                      }}
+                      className={styles.dropdownLogoutBtn}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      <span>Sign Out</span>
+                    </button>
                   </div>
-
-                  <div className={styles.profileDropdownLinks}>
-                    <Link
-                      href="/student/profile"
-                      onClick={() => setIsProfileOpen(false)}
-                      className={styles.profileDropdownLink}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                      </svg>
-                      <span>Student Profile</span>
-                    </Link>
-
-                    <Link
-                      href="/student/settings"
-                      onClick={() => setIsProfileOpen(false)}
-                      className={styles.profileDropdownLink}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="3" />
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                      </svg>
-                      <span>Settings</span>
-                    </Link>
-
-                    <Link
-                      href="/student/change-mess"
-                      onClick={() => setIsProfileOpen(false)}
-                      className={styles.profileDropdownLink}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m16 3 4 4-4 4" />
-                        <path d="M20 7H4" />
-                        <path d="m8 21-4-4 4-4" />
-                        <path d="M4 17h16" />
-                      </svg>
-                      <span>Change Mess</span>
-                    </Link>
-
-                    <Link
-                      href="/student/history"
-                      onClick={() => setIsProfileOpen(false)}
-                      className={styles.profileDropdownLink}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                        <path d="M3 3v5h5" />
-                        <polyline points="12 7 12 12 15 15" />
-                      </svg>
-                      <span>Meal History</span>
-                    </Link>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      handleLogout();
-                    }}
-                    className={styles.dropdownLogoutBtn}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                      <polyline points="16 17 21 12 16 7" />
-                      <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
-                    <span>Sign Out</span>
-                  </button>
-                </div>
+                </>
               )}
             </div>
           </div>
         </header>
-
-        {/* Global Backdrop for closing open dropdowns */}
-        {(isNotificationOpen || isProfileOpen || (isSearchOpen && searchQuery.trim().length > 0)) && (
-          <div
-            className={styles.dropdownBackdrop}
-            onClick={() => {
-              setIsNotificationOpen(false);
-              setIsProfileOpen(false);
-              setIsSearchOpen(false);
-            }}
-            aria-hidden="true"
-          />
-        )}
 
         {children}
       </main>

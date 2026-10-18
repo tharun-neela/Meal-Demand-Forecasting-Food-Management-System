@@ -152,99 +152,58 @@
 .daySelectorSection {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
   width: 100%;
   box-sizing: border-box;
 }
 
-.selectorHeaderRow {
+/* Side-by-side Carousel Container with Flanking Arrow Buttons (< and >) */
+.dayCarouselContainer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.selectorLeftInfo {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.selectorLabel {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.01em;
-}
-
-.cycleNotice {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #64748b;
-}
-
-/* Slide Left / Right Controls */
-.sliderControls {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.slideNavBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  height: 36px;
-  padding: 0 0.85rem;
-  background-color: #f8fafc;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #334155;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-
-.slideNavBtn:hover {
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
-}
-
-.slideNavBtn:active {
-  transform: scale(0.97);
-}
-
-.dateRangeBadge {
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 0.85rem;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #0f172a;
-  white-space: nowrap;
-}
-
-/* 7-DAY GRID: Fits 100% within the screen width */
-.dayGrid7 {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.65rem;
   width: 100%;
   box-sizing: border-box;
 }
 
+.daySlideArrowBtn {
+  width: 36px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  color: #475569;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+  user-select: none;
+}
+
+.daySlideArrowBtn:hover {
+  background-color: #f1f5f9;
+  border-color: #f36f21;
+  color: #f36f21;
+  box-shadow: 0 4px 12px rgba(243, 111, 33, 0.18);
+  transform: scale(1.04);
+}
+
+.daySlideArrowBtn:active {
+  transform: scale(0.96);
+}
+
+/* 7-DAY GRID: Clean 2D Serial Row */
+.dayGrid7 {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.65rem;
+  box-sizing: border-box;
+}
+
+/* Date Pill: Clean 2D Serial Date with Circular Oval Capsule Shape */
 .dayPill {
   width: 100%;
   box-sizing: border-box;
@@ -255,9 +214,9 @@
   gap: 0.35rem;
   background-color: #f8fafc;
   border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 9999px; /* Circular oval capsule shape */
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.16s ease;
   user-select: none;
   min-width: 0;
 }
@@ -272,13 +231,13 @@
   background-color: #f36f21 !important;
   border-color: #f36f21 !important;
   color: #ffffff !important;
-  box-shadow: 0 6px 16px rgba(243, 111, 33, 0.35);
+  box-shadow: 0 6px 16px rgba(243, 111, 33, 0.35) !important;
   transform: translateY(-2px);
 }
 
 .dayPillName {
   font-size: 0.74rem;
-  font-weight: 700;
+  font-weight: 800;
   color: #64748b;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -289,8 +248,8 @@
 }
 
 .dayPillNumber {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.45rem;
+  font-weight: 800;
   color: #0f172a;
   line-height: 1;
 }
@@ -303,15 +262,15 @@
   font-size: 0.68rem;
   font-weight: 600;
   color: #94a3b8;
-  padding: 0.1rem 0.35rem;
+  padding: 0.15rem 0.55rem;
   background-color: rgba(0, 0, 0, 0.04);
-  border-radius: 4px;
+  border-radius: 9999px;
   white-space: nowrap;
 }
 
 .dayPillActive .dayPillTag {
   color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.22);
+  background-color: rgba(255, 255, 255, 0.28);
 }
 
 /* ============================================================
@@ -331,9 +290,16 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.85rem;
   width: 100%;
   box-sizing: border-box;
+}
+
+.mealsHeaderLeft {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.85rem;
 }
 
 .mealsSectionTitle {
@@ -341,6 +307,242 @@
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.01em;
+}
+
+/* Prominent Small Date Icon & Range Picker Trigger */
+.datePickerTriggerWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.datePickerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.38rem 0.85rem;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  user-select: none;
+}
+
+.datePickerBtn:hover {
+  border-color: #f36f21;
+  background-color: #fff7ed;
+  color: #ea580c;
+  box-shadow: 0 2px 8px rgba(243, 111, 33, 0.16);
+  transform: translateY(-1px);
+}
+
+.calendarIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f36f21;
+}
+
+.datePickerRangeLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.datePickerChevron {
+  color: #94a3b8;
+  transition: transform 0.15s ease;
+}
+
+.datePickerBtn:hover .datePickerChevron {
+  color: #ea580c;
+  transform: translateY(1px);
+}
+
+.datePickerChevronOpen {
+  transform: rotate(180deg) !important;
+  color: #ea580c !important;
+}
+
+/* Calendar Popover Dropdown */
+.calendarPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 310px;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.16), 0 6px 12px -2px rgba(15, 23, 42, 0.08);
+  padding: 1.15rem;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  animation: calendarPopAnim 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes calendarPopAnim {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.calendarNavHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendarMonthTitle {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.calendarNavBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 1.15rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calendarNavBtn:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.calendarWeekDaysRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.calendarDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendarDayCell {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  position: relative;
+}
+
+.calendarDayCell:hover {
+  background-color: #f1f5f9;
+  color: #f36f21;
+}
+
+.calendarDayCellToday {
+  border-color: #f36f21;
+  font-weight: 700;
+  color: #f36f21;
+}
+
+.calendarDayCellActive {
+  background-color: #f36f21 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(243, 111, 33, 0.4);
+}
+
+.calendarEmptyCell {
+  height: 34px;
+}
+
+.calendarFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.65rem;
+}
+
+.calendarTodayBtn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f36f21;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.calendarTodayBtn:hover {
+  background-color: #fff7ed;
+}
+
+.calendarCloseBtn {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.calendarCloseBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.todayResetBadgeBtn {
+  padding: 0.35rem 0.75rem;
+  background-color: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.todayResetBadgeBtn:hover {
+  background-color: #f36f21;
+  border-color: #f36f21;
+  color: #ffffff;
 }
 
 .mealCountBadge {
@@ -361,29 +563,38 @@
 .mealCard {
   display: flex;
   gap: 1.35rem;
-  background-color: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  background-color: #e5eaf2;
+  border: 1.5px solid #cbd5e1;
   border-radius: 14px;
   padding: 1.25rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
   width: 100%;
   box-sizing: border-box;
 }
 
 .mealCard:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  background-color: #d6dee8;
+  border-color: #94a3b8;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
 }
 
 /* Live Ongoing Meal Card (Professional, Ambient Glowing Pulse) */
 .mealCardOngoing {
   order: -1;
   border-color: #f97316 !important;
-  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 247, 237, 0.75) 100%) !important;
+  background: linear-gradient(180deg, #fff7ed 0%, #fed7aa 100%) !important;
   box-shadow: 0 0 0 2.5px rgba(249, 115, 22, 0.45), 0 8px 30px rgba(249, 115, 22, 0.28), 0 0 20px rgba(251, 146, 60, 0.35) !important;
   animation: professionalMealGlow 2.4s ease-in-out infinite alternate;
   position: relative;
+}
+
+.mealCardOngoing:hover {
+  background: linear-gradient(180deg, #ffedd5 0%, #fdba74 100%) !important;
+  border-color: #ea580c !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.65), 0 12px 36px rgba(249, 115, 22, 0.35) !important;
+  transform: translateY(-2px);
 }
 
 @keyframes professionalMealGlow {
@@ -497,7 +708,7 @@
   min-width: 110px;
   height: 110px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background-color: #ffffff;
   border: 1.5px dashed #cbd5e1;
   display: flex;
   flex-direction: column;
@@ -549,7 +760,7 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.85rem;
-  background-color: #f1f5f9;
+  background-color: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -591,20 +802,21 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 0.65rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #f1f5f9;
+  padding-top: 0.65rem;
+  border-top: 1px solid #cbd5e1;
   width: 100%;
   box-sizing: border-box;
 }
 
 .categoryCard {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.7rem 0.85rem;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 0.75rem 0.9rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
 }
 
 .categoryTitle {
@@ -719,14 +931,8 @@
     font-size: 1.25rem;
   }
 
-  .selectorHeaderRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .sliderControls {
-    width: 100%;
-    justify-content: space-between;
+  .daySlideArrowBtn {
+    width: 28px;
+    height: 56px;
   }
 }

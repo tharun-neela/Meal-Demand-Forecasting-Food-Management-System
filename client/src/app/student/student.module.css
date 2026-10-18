@@ -366,13 +366,13 @@
    ============================================================ */
 
 .topNavbar {
-  height: 64px;
-  min-height: 64px;
+  height: 82px;
+  min-height: 82px;
   position: sticky;
   top: 0;
-  z-index: 45;
+  z-index: 100;
   background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1.5px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -384,21 +384,24 @@
 .topNavLeft {
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .topNavPageTitle {
-  font-size: 1.45rem;
-  font-weight: 700;
+  font-size: 2.35rem;
+  font-weight: 850;
   color: #0f172a;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.04em;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .topNavRight {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 1.25rem;
+  flex-shrink: 0;
 }
 
 /* 1. Modern Search Bar */
@@ -406,7 +409,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 290px;
+  width: 440px;
 }
 
 .searchInput {
@@ -629,6 +632,8 @@
   gap: 0.25rem;
   cursor: pointer;
   transition: background-color 0.12s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .notificationItem:hover {
@@ -652,21 +657,53 @@
   color: #94a3b8;
 }
 
-.dropdownFooterLink {
-  padding: 0.75rem;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #f36f21;
-  background-color: #ffffff;
+.dropdownFooter {
+  padding: 0.45rem 0.75rem;
   border-top: 1px solid #e2e8f0;
-  text-decoration: none;
-  transition: background-color 0.12s ease;
+  background-color: #f8fafc;
+  display: flex;
+  justify-content: center;
 }
 
-.dropdownFooterLink:hover {
-  background-color: #f8fafc;
-  text-decoration: underline;
+.dropdownFooterBtn {
+  width: 100%;
+  height: 31px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0 0.75rem;
+  background-color: #f36f21;
+  color: #ffffff !important;
+  border: 1px solid #ea580c;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 4px rgba(243, 111, 33, 0.2);
+  font-family: inherit;
+  user-select: none;
+  text-decoration: none;
+}
+
+.dropdownFooterBtn:hover {
+  background-color: #ea580c;
+  border-color: #c2410c;
+  box-shadow: 0 2px 7px rgba(243, 111, 33, 0.28);
+  transform: translateY(-1px);
+  color: #ffffff !important;
+}
+
+.dropdownFooterBtn:active {
+  transform: translateY(0);
+}
+
+.dropdownBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background-color: transparent;
 }
 
 /* 3. Profile Icon Button & Dropdown */
@@ -1070,4 +1107,56 @@
   .pageTitle {
     font-size: 1.35rem;
   }
+}
+
+/* Authentication Verification Gate */
+.authGateOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+}
+
+.authGateCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.25rem 2.75rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.authGateSpinner {
+  width: 36px;
+  height: 36px;
+  border: 3.5px solid #f1f5f9;
+  border-top-color: #f36f21;
+  border-radius: 50%;
+  animation: authSpinnerAnim 0.75s linear infinite;
+}
+
+@keyframes authSpinnerAnim {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.authGateText {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: -0.01em;
+  margin: 0;
 }
