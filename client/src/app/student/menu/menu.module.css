@@ -571,6 +571,7 @@
   box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
   width: 100%;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 .mealCard:hover {
@@ -580,30 +581,31 @@
   transform: translateY(-2px);
 }
 
-/* Live Ongoing Meal Card (Professional, Ambient Glowing Pulse) */
+/* Live Ongoing Meal Card (Clean Solid Brand Orange Border, No Glowing Effect) */
 .mealCardOngoing {
   order: -1;
-  border-color: #f97316 !important;
-  background: linear-gradient(180deg, #fff7ed 0%, #fed7aa 100%) !important;
-  box-shadow: 0 0 0 2.5px rgba(249, 115, 22, 0.45), 0 8px 30px rgba(249, 115, 22, 0.28), 0 0 20px rgba(251, 146, 60, 0.35) !important;
-  animation: professionalMealGlow 2.4s ease-in-out infinite alternate;
+  background-color: #ffffff !important;
+  border: 2px solid #f36f21 !important;
+  border-radius: 14px !important;
   position: relative;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06) !important;
 }
 
 .mealCardOngoing:hover {
-  background: linear-gradient(180deg, #ffedd5 0%, #fdba74 100%) !important;
+  background-color: #ffffff !important;
   border-color: #ea580c !important;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.65), 0 12px 36px rgba(249, 115, 22, 0.35) !important;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.08) !important;
   transform: translateY(-2px);
 }
 
-@keyframes professionalMealGlow {
-  0% {
-    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.38), 0 6px 20px rgba(249, 115, 22, 0.22), 0 0 15px rgba(251, 146, 60, 0.25);
-  }
-  100% {
-    box-shadow: 0 0 0 3.5px rgba(249, 115, 22, 0.7), 0 10px 38px rgba(249, 115, 22, 0.45), 0 0 30px rgba(249, 115, 22, 0.55);
-  }
+.mealCardOngoing .blankPhotoCard {
+  background-color: #fffaf5;
+  border-color: #fed7aa;
+}
+
+.mealCardOngoing .blankPhotoIcon {
+  color: #f36f21;
+  opacity: 0.85;
 }
 
 /* Pulsing Status Dot */

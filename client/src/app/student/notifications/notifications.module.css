@@ -111,7 +111,6 @@
   border: 1.5px solid #cbd5e1;
   border-radius: 14px;
   transition: all 0.18s ease;
-  cursor: pointer;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
@@ -125,6 +124,11 @@
   background-color: #fffdfa;
   border-color: rgba(243, 111, 33, 0.4);
   box-shadow: 0 4px 14px rgba(243, 111, 33, 0.08);
+  cursor: pointer;
+}
+
+.notificationCardRead {
+  cursor: default;
 }
 
 .cardIconCol {
@@ -251,13 +255,27 @@
 
 .readToggleHint {
   font-size: 0.74rem;
-  font-weight: 500;
-  color: #94a3b8;
+  font-weight: 650;
+  color: #ea580c;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+  transition: color 0.15s ease;
 }
 
-.notificationCard:hover .readToggleHint {
-  color: #64748b;
+.notificationCardUnread:hover .readToggleHint {
+  color: #c2410c;
   text-decoration: underline;
+}
+
+.readStatusBadge {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  user-select: none;
 }
 
 .emptyState {

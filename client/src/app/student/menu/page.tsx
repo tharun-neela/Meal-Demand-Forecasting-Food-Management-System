@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./menu.module.css";
 import {
   CalculatedDateInfo,
@@ -15,6 +16,7 @@ import {
 const INITIAL_DATE = new Date(2026, 9, 18);
 
 export default function StudentMenuPage() {
+  const router = useRouter();
   // Today's anchor date
   const [todayAnchor, setTodayAnchor] = useState<Date>(INITIAL_DATE);
   const [todayDate, setTodayDate] = useState<Date>(INITIAL_DATE);
@@ -527,6 +529,8 @@ export default function StudentMenuPage() {
               <article
                 key={key}
                 className={`${styles.mealCard} ${isOngoing ? styles.mealCardOngoing : ""}`}
+                onClick={() => router.push("/student/access-meal")}
+                title="Click to access meal"
               >
                 {/* Blank Photo Canvas - Strictly No Photo, Elegant Neutral Container */}
                 <div className={styles.blankPhotoCard} aria-hidden="true">
@@ -570,7 +574,10 @@ export default function StudentMenuPage() {
                   <button
                     type="button"
                     className={styles.categoriesToggleBtn}
-                    onClick={() => toggleMealDetails(key)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleMealDetails(key);
+                    }}
                   >
                     <span>{isExpanded ? "Hide Items Breakdown" : "View Full Thali Items"}</span>
                     <svg
@@ -590,8 +597,21 @@ export default function StudentMenuPage() {
                   </button>
 
                   {isExpanded && (
-                    <div className={styles.categoriesGrid}>
-                      {data.sections.map((sec) => (
+                    <div
+                      className={styles.categoriesGrid}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {[...data.sections]
+                        .sort((a, b) => {
+                          const aIsNorth = a.category.toLowerCase().includes("north");
+                          const bIsNorth = b.category.toLowerCase().includes("north");
+                          const aIsSouth = a.category.toLowerCase().includes("south");
+                          const bIsSouth = b.category.toLowerCase().includes("south");
+                          if (aIsNorth && bIsSouth) return -1;
+                          if (aIsSouth && bIsNorth) return 1;
+                          return 0;
+                        })
+                        .map((sec) => (
                         <div key={sec.category} className={styles.categoryCard}>
                           <span className={styles.categoryTitle}>{sec.category}</span>
                           <ul className={styles.categoryItemList}>

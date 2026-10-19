@@ -89,8 +89,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "12:30 PM – 03:00 PM",
         highlight: "Pindi Chhole, Aloo Pyaz Masaledar, Puliyodharai, Boondi Raita",
         sections: [
-          { category: "South Indian", items: ["Kara Kuzhambu", "Cabbage Poriyal", "Puliyodharai"] },
           { category: "North Indian", items: ["Pindi Chhole", "Aloo Pyaz Masaledar", "Plain Rice"] },
+          { category: "South Indian", items: ["Kara Kuzhambu", "Cabbage Poriyal", "Puliyodharai"] },
           { category: "Curd & Raita", items: ["Boondi Raita"] },
           { category: "Breads & Accompaniments", items: ["Roti and Bhatura", "Pickled Onion"] },
         ],
@@ -111,8 +111,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Mysore Sambhar, Matar Nutri, Moong Chilka Dal, Gulab Jamun",
         sections: [
-          { category: "South Indian", items: ["Mysore Sambhar", "Zimikand Pulusu (Seasonal)", "Plain Rice"] },
           { category: "North Indian", items: ["Moong Chilka Dal", "Matar Nutri", "Bhuna Onion Pulao"] },
+          { category: "South Indian", items: ["Mysore Sambhar", "Zimikand Pulusu (Seasonal)", "Plain Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
           { category: "Dessert", items: ["Gulab Jamun"] },
         ],
@@ -144,8 +144,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Dal Milijuli, Bhindi Masala, Tomato Meal Maker, Veg Pulao",
         sections: [
-          { category: "South Indian", items: ["Mudha Pappu", "Tomato Meal Maker", "Plain Rice"] },
           { category: "North Indian", items: ["Dal Milijuli", "Bhindi Masala (Seasonal)", "Veg Pulao"] },
+          { category: "South Indian", items: ["Mudha Pappu", "Tomato Meal Maker", "Plain Rice"] },
           { category: "Curd & Raita", items: ["Plain Curd"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
         ],
@@ -166,8 +166,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Palak Paneer / Kadai Paneer, Soya Biryani, Seviyan Kheer",
         sections: [
-          { category: "South Indian", items: ["Majjiga Pulusu", "Donda Kaya Fry", "Soya Biryani"] },
           { category: "North Indian", items: ["Yellow Moong Dal", "Palak Paneer / Kadai Paneer", "Plain Rice"] },
+          { category: "South Indian", items: ["Majjiga Pulusu", "Donda Kaya Fry", "Soya Biryani"] },
           { category: "Breads & Accompaniments", items: ["Roti and Missi Roti", "Green Salad"] },
           { category: "Dessert", items: ["Seviyan Kheer"] },
         ],
@@ -199,8 +199,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Rajma, Mix Veg, Lemon Rice, Fruit Raita",
         sections: [
-          { category: "South Indian", items: ["Vaskaya Curry", "Mor Kuzhambu", "Lemon Rice"] },
           { category: "North Indian", items: ["Rajma", "Mix Veg", "Plain Rice"] },
+          { category: "South Indian", items: ["Vaskaya Curry", "Mor Kuzhambu", "Lemon Rice"] },
           { category: "Curd & Raita", items: ["Fruit Raita"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
         ],
@@ -221,8 +221,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Sabut Masoor Dal, Mushroom Matar, Veg Dum Biryani, Besan Burfi",
         sections: [
-          { category: "South Indian", items: ["Beerakaya Pappu", "Vada Curry", "Plain Rice"] },
           { category: "North Indian", items: ["Sabut Masoor Dal", "Mushroom Matar / Methi Malai Matar", "Veg Dum Biryani"] },
+          { category: "South Indian", items: ["Beerakaya Pappu", "Vada Curry", "Plain Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
           { category: "Dessert", items: ["Besan Burfi"] },
         ],
@@ -254,8 +254,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Tomato Pappu, Veg 65 / Mirchi Bajji, Bisi Bele Bath, Lauki Mint Raita",
         sections: [
-          { category: "South Indian", items: ["Tomato Pappu", "Veg 65 / Mirchi Bajji", "Bisi Bele Bath"] },
           { category: "North Indian", items: ["Yellow Dal Fry", "Lauki / Tori Lahsun (Seasonal)", "Plain Rice"] },
+          { category: "South Indian", items: ["Tomato Pappu", "Veg 65 / Mirchi Bajji", "Bisi Bele Bath"] },
           { category: "Curd & Raita", items: ["Lauki Mint Raita"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
         ],
@@ -276,8 +276,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Mash Ki Dal, Aloo Baingan Chokha, Jeera Rice, Rasgulla",
         sections: [
-          { category: "South Indian", items: ["Tamarind Rasam", "Potato Peas Poriyal", "Plain Rice"] },
           { category: "North Indian", items: ["Mash Ki Dal", "Aloo Baingan Chokha", "Jeera Rice"] },
+          { category: "South Indian", items: ["Tamarind Rasam", "Potato Peas Poriyal", "Plain Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti / Lisi", "Fryums"] },
           { category: "Dessert", items: ["Rasgulla"] },
         ],
@@ -309,8 +309,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Punjabi Kadhi Pakoda, Aloo Matar Gravy, Mix Veg Poriyal, Jeera Onion Pulao",
         sections: [
-          { category: "South Indian", items: ["Pachi Pulusu", "Mix Veg Poriyal (Seasonal)", "Curd Rice"] },
           { category: "North Indian", items: ["Punjabi Kadhi Pakoda", "Aloo Matar Gravy", "Jeera Onion Pulao"] },
+          { category: "South Indian", items: ["Pachi Pulusu", "Mix Veg Poriyal (Seasonal)", "Curd Rice"] },
           { category: "Curd & Raita", items: ["Majjiga Pulusu"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
         ],
@@ -331,8 +331,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Dal Palak, Paneer Do Pyaza, Kandhi Pappu, Moong Dal Halwa",
         sections: [
-          { category: "South Indian", items: ["Kandhi Pappu", "Meal Maker Curry", "Plain Rice"] },
           { category: "North Indian", items: ["Dal Palak", "Paneer Do Pyaza", "Matar Pulao"] },
+          { category: "South Indian", items: ["Kandhi Pappu", "Meal Maker Curry", "Plain Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
           { category: "Dessert", items: ["Moong Dal Halwa / Ice Cream"] },
         ],
@@ -364,8 +364,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Sambhar, Bagara Baingan, Black Chana, Mix Veg Kofta, Veg Pulao",
         sections: [
-          { category: "South Indian", items: ["Sambhar", "Bagara Baingan", "Plain Rice"] },
           { category: "North Indian", items: ["Black Chana", "Mix Veg Kofta", "Veg Pulao"] },
+          { category: "South Indian", items: ["Sambhar", "Bagara Baingan", "Plain Rice"] },
           { category: "Curd & Raita", items: ["Mix-Veg Raita"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Pickled Onion"] },
         ],
@@ -386,8 +386,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Arhar Dal, Bhindi Pulusu, Mix Veg, Tomato Rice, Balushahi",
         sections: [
-          { category: "South Indian", items: ["Tomato Rasam", "Bhindi Pulusu (Seasonal)", "Tomato Rice"] },
           { category: "North Indian", items: ["Arhar Dal", "Mix Veg", "Plain Rice"] },
+          { category: "South Indian", items: ["Tomato Rasam", "Bhindi Pulusu (Seasonal)", "Tomato Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti and Ajwain Roti", "Fryums"] },
           { category: "Dessert", items: ["Balushahi"] },
         ],
@@ -419,8 +419,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Paruppu Urundai Kulambu, Matar Paneer, Khuska, Dahi Bhalla",
         sections: [
-          { category: "South Indian", items: ["Senaga Pappu", "Paruppu Urundai Kulambu", "Khuska"] },
           { category: "North Indian", items: ["Matar Paneer / Mixed Mushroom", "Arbi Ajwaini Masala (Seasonal)", "Plain Rice"] },
+          { category: "South Indian", items: ["Senaga Pappu", "Paruppu Urundai Kulambu", "Khuska"] },
           { category: "Curd & Raita", items: ["Dahi Bhalla"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad and Imly Chutney"] },
         ],
@@ -441,8 +441,8 @@ export const WEEK_1_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Vengaya Sambhar, Rajma, Soya & Matar Dum Biryani, Kheer",
         sections: [
-          { category: "South Indian", items: ["Vengaya Sambhar (Onion)", "Artikai Vepudu", "Soya & Matar Dum Biryani"] },
           { category: "North Indian", items: ["Rajma", "Aloo Shimla", "Plain Rice"] },
+          { category: "South Indian", items: ["Vengaya Sambhar (Onion)", "Artikai Vepudu", "Soya & Matar Dum Biryani"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
           { category: "Dessert", items: ["Kheer"] },
         ],
@@ -479,8 +479,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "12:30 PM – 03:00 PM",
         highlight: "Pindi Chhole, Khatta Meetha Petha, Gutti Vankaya, Tomato Rice",
         sections: [
-          { category: "South Indian", items: ["Garlic Pepper Rasam", "Gutti Vankaya", "Tomato Rice"] },
           { category: "North Indian", items: ["Pindi Chhole", "Khatta Meetha Petha", "Jeera Rice"] },
+          { category: "South Indian", items: ["Garlic Pepper Rasam", "Gutti Vankaya", "Tomato Rice"] },
           { category: "Curd & Raita", items: ["Plain Curd"] },
           { category: "Breads & Accompaniments", items: ["Roti and Bhatura", "Pickled Onion"] },
         ],
@@ -501,8 +501,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Hari Moong Dal, Nutri Chilly, Beans Poriyal, Sooji Halwa",
         sections: [
-          { category: "South Indian", items: ["Thakkali Sambhar", "Beans Poriyal (Seasonal)", "Plain Rice"] },
           { category: "North Indian", items: ["Hari Moong Dal", "Nutri Chilly", "Veg Pulao"] },
+          { category: "South Indian", items: ["Thakkali Sambhar", "Beans Poriyal (Seasonal)", "Plain Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
           { category: "Dessert", items: ["Sooji Halwa (Saji Halwa)"] },
         ],
@@ -534,8 +534,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Dal Makhni, Bhindi Do Pyaza, Vegetable Sagu, Curd Rice",
         sections: [
-          { category: "South Indian", items: ["Chamagadda Pulusu", "Vegetable Sagu", "Curd Rice"] },
           { category: "North Indian", items: ["Dal Makhni", "Bhindi Do Pyaza (Seasonal)", "Plain Rice"] },
+          { category: "South Indian", items: ["Chamagadda Pulusu", "Vegetable Sagu", "Curd Rice"] },
           { category: "Curd & Raita", items: ["Cucumber/Ghiya Raita"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
         ],
@@ -556,8 +556,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Tomato Pappu, Aloo Parwal / Shimla Mirch, Chitranna Rice, Coconut Laddu",
         sections: [
-          { category: "South Indian", items: ["Tomato Pappu", "Aloo Gadda Vepudu", "Chitranna Rice"] },
           { category: "North Indian", items: ["Yellow Moong Dal", "Aloo Parwal / Shimla Mirch (Seasonal)", "Plain Rice"] },
+          { category: "South Indian", items: ["Tomato Pappu", "Aloo Gadda Vepudu", "Chitranna Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
           { category: "Dessert", items: ["Coconut Laddu"] },
         ],
@@ -589,8 +589,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Lobia Dal, Potato 65, Drum Stick Sambhar, Coconut Rice",
         sections: [
-          { category: "South Indian", items: ["Drum Stick Sambhar", "Potato 65", "Coconut Rice"] },
           { category: "North Indian", items: ["Lobia Dal", "Mix Veg", "Plain Rice"] },
+          { category: "South Indian", items: ["Drum Stick Sambhar", "Potato 65", "Coconut Rice"] },
           { category: "Curd & Raita", items: ["Mix-Veg Raita"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
         ],
@@ -611,8 +611,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Paneer Butter Masala, Hyderabadi Biryani, Spinach Roti, Gulab Jamun",
         sections: [
-          { category: "South Indian", items: ["Beerakaya Pappu", "Vegetable Kurma", "Hyderabadi Biryani"] },
           { category: "North Indian", items: ["Mash Chana Dal", "Paneer Butter Masala", "Plain Rice"] },
+          { category: "South Indian", items: ["Beerakaya Pappu", "Vegetable Kurma", "Hyderabadi Biryani"] },
           { category: "Breads & Accompaniments", items: ["Roti and Spinach Roti", "Green Salad"] },
           { category: "Dessert", items: ["Gulab Jamun"] },
         ],
@@ -644,8 +644,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Mushroom Chettinad Curry, Nutri Keema Matar, Pudina Rice, Boondi Raita",
         sections: [
-          { category: "South Indian", items: ["Tamarind Rasam", "Mushroom Chettinad Curry", "Pudina Rice"] },
           { category: "North Indian", items: ["Sabut Masoor Dal", "Nutri Keema Matar (Seasonal)", "Plain Rice"] },
+          { category: "South Indian", items: ["Tamarind Rasam", "Mushroom Chettinad Curry", "Pudina Rice"] },
           { category: "Curd & Raita", items: ["Boondi Raita"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
         ],
@@ -666,8 +666,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Rajma Rasila, Aloo Matar Dry, Puliyodharai, Besan Burfi",
         sections: [
-          { category: "South Indian", items: ["Pasi Paruppu Sambhar", "Donda Kaya Fry", "Puliyodharai"] },
           { category: "North Indian", items: ["Rajma Rasila", "Aloo Matar Dry", "Veg Pulao"] },
+          { category: "South Indian", items: ["Pasi Paruppu Sambhar", "Donda Kaya Fry", "Puliyodharai"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
           { category: "Dessert", items: ["Besan Burfi"] },
         ],
@@ -699,8 +699,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Punjabi Kadhi Pakoda, Dum Aloo, Beans Tomato Aloo Curry, Soya Biryani",
         sections: [
-          { category: "South Indian", items: ["Pappu Charu", "Beans Tomato Aloo Curry (Seasonal)", "Soya Biryani"] },
           { category: "North Indian", items: ["Punjabi Kadhi Pakoda", "Dum Aloo", "Plain Rice"] },
+          { category: "South Indian", items: ["Pappu Charu", "Beans Tomato Aloo Curry (Seasonal)", "Soya Biryani"] },
           { category: "Curd & Raita", items: ["Majjiga Pulusu"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
         ],
@@ -721,8 +721,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "White Chana, Manchurian, Fried Rice / Noodles, Boondi Laddu",
         sections: [
-          { category: "South Indian", items: ["Senaga Pappu", "Avial", "Plain Rice"] },
           { category: "North Indian", items: ["White Chana", "Manchurian", "Fried Rice / Noodles"] },
+          { category: "South Indian", items: ["Senaga Pappu", "Avial", "Plain Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad"] },
           { category: "Dessert", items: ["Boondi Laddu"] },
         ],
@@ -754,8 +754,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Dal Palak, Soya Chaap Masala, Veg 65 / Cabbage 65, Jeera Rice",
         sections: [
-          { category: "South Indian", items: ["Mysore Sambhar", "Veg 65 / Cabbage 65", "Plain Rice"] },
           { category: "North Indian", items: ["Dal Palak", "Soya Chaap Masala", "Jeera Rice"] },
+          { category: "South Indian", items: ["Mysore Sambhar", "Veg 65 / Cabbage 65", "Plain Rice"] },
           { category: "Curd & Raita", items: ["Plain Curd"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
         ],
@@ -776,8 +776,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Dal Makhni, Bhindi Masala, Kerala Urulai Roast, Gajar Ka Halwa",
         sections: [
-          { category: "South Indian", items: ["Meal Maker Curry", "Kerala Urulai Roast", "Plain Rice"] },
           { category: "North Indian", items: ["Dal Makhni", "Bhindi Masala (Seasonal)", "Jeera Rice"] },
+          { category: "South Indian", items: ["Meal Maker Curry", "Kerala Urulai Roast", "Plain Rice"] },
           { category: "Breads & Accompaniments", items: ["Roti and Ajwain Roti", "Green Salad"] },
           { category: "Dessert", items: ["Gajar Ka Halwa / Ice Cream"] },
         ],
@@ -809,8 +809,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "11:30 AM – 03:00 PM",
         highlight: "Kadai Paneer, Rajma, Cabbage Pappu, Andhra Veg Biryani, Dahi Bhalla",
         sections: [
-          { category: "South Indian", items: ["Cabbage Pappu", "Aloo Gadda Vepudu", "Andhra Veg Biryani"] },
           { category: "North Indian", items: ["Rajma", "Kadai Paneer", "Plain Rice"] },
+          { category: "South Indian", items: ["Cabbage Pappu", "Aloo Gadda Vepudu", "Andhra Veg Biryani"] },
           { category: "Curd & Raita", items: ["Dahi Bhalla"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Green Salad and Imly Chutney"] },
         ],
@@ -831,8 +831,8 @@ export const WEEK_2_MENU: Record<string, DayMenu> = {
         timing: "07:30 PM – 09:30 PM",
         highlight: "Panchratani Dal, Mix Veg, Arbi Pulusu, Bisi Bele Bath, Fruit Custard",
         sections: [
-          { category: "South Indian", items: ["Pepper Rasam", "Arbi Pulusu (Seasonal)", "Bisi Bele Bath"] },
           { category: "North Indian", items: ["Panchratani Dal", "Mix Veg", "Plain Rice"] },
+          { category: "South Indian", items: ["Pepper Rasam", "Arbi Pulusu (Seasonal)", "Bisi Bele Bath"] },
           { category: "Breads & Accompaniments", items: ["Roti", "Fryums"] },
           { category: "Dessert", items: ["Fruit Custard"] },
         ],

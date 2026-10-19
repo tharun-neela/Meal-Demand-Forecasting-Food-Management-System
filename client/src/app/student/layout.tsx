@@ -5,6 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./student.module.css";
+import {
+  getStoredNotifications,
+  getUnreadCount,
+  saveStoredNotifications,
+  type NotificationItem,
+} from "./notifications/notificationData";
 
 interface NavItem {
   label: string;
@@ -167,40 +173,7 @@ const SEARCH_OPTIONS: SearchOption[] = [
   { title: "Settings", category: "Account", href: "/student/settings", keywords: ["preferences", "password", "theme", "config"] },
 ];
 
-const SAMPLE_NOTIFICATIONS = [
-  {
-    id: "1",
-    category: "menu",
-    title: "Today's lunch menu is published!",
-    body: "Rice, dal, roti and paneer curry. Check the full menu before lunch.",
-    time: "10m ago",
-    unread: true,
-  },
-  {
-    id: "2",
-    category: "timing",
-    title: "Lunch starts in 15 minutes",
-    body: "Lunch service is scheduled from 12:00 PM to 2:00 PM.",
-    time: "25m ago",
-    unread: true,
-  },
-  {
-    id: "3",
-    category: "attendance",
-    title: "Lunch attendance recorded",
-    body: "Your attendance for today's lunch has been recorded successfully.",
-    time: "Today, 12:42 PM",
-    unread: false,
-  },
-  {
-    id: "4",
-    category: "announcement",
-    title: "Dinner timing updated",
-    body: "Today's dinner service will begin at 7:30 PM instead of 7:00 PM.",
-    time: "2h ago",
-    unread: false,
-  },
-];
+
 
 const PAGE_TITLES: Record<string, string> = {
   "/student": "Dashboard",
@@ -217,6 +190,15 @@ const PAGE_TITLES: Record<string, string> = {
   "/student/settings": "Settings",
 };
 
+interface SearchItemResult {
+  id?: string;
+  title: string;
+  category: string;
+  subtitle?: string;
+  href: string;
+  type: "page" | "notification";
+}
+
 export default function StudentLayout({
   children,
 }: {
@@ -229,23 +211,96 @@ export default function StudentLayout({
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(3);
+  const [dropdownNotifications, setDropdownNotifications] = useState<NotificationItem[]>([]);
+
   const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const router = useRouter();
 
   const pageHeading = PAGE_TITLES[pathname] || "Dashboard";
 
-  // Quick search filtering
-  const filteredSearchItems = useMemo(() => {
+  // Quick search filtering (searches both pages and student notifications)
+  const filteredSearchItems: SearchItemResult[] = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase().trim();
-    return SEARCH_OPTIONS.filter(
+
+    const matchedPages: SearchItemResult[] = SEARCH_OPTIONS.filter(
       (item) =>
         item.title.toLowerCase().includes(q) ||
         item.category.toLowerCase().includes(q) ||
         item.keywords.some((k) => k.toLowerCase().includes(q))
-    ).slice(0, 5);
+    ).map((item) => ({
+      title: item.title,
+      category: item.category,
+      href: item.href,
+      type: "page",
+    }));
+
+    const storedNotifs = getStoredNotifications();
+    const matchedNotifs: SearchItemResult[] = storedNotifs
+      .filter(
+        (notif) =>
+          notif.title.toLowerCase().includes(q) ||
+          notif.body.toLowerCase().includes(q) ||
+          notif.category.toLowerCase().includes(q)
+      )
+      .map((notif) => ({
+        id: notif.id,
+        title: notif.title,
+        category: `Notification • ${notif.category.toUpperCase()}`,
+        subtitle: notif.body,
+        href: "/student/notifications",
+        type: "notification",
+      }));
+
+    return [...matchedPages.slice(0, 4), ...matchedNotifs.slice(0, 4)].slice(0, 7);
   }, [searchQuery]);
+
+  const onSelectSearchItem = (targetItem: SearchItemResult) => {
+    setSearchQuery("");
+    setIsSearchOpen(false);
+    setHighlightedIndex(-1);
+    if (targetItem.type === "notification" && targetItem.id) {
+      const stored = getStoredNotifications();
+      const updated = stored.map((n) => (n.id === targetItem.id ? { ...n, isRead: true } : n));
+      saveStoredNotifications(updated);
+    }
+    if (targetItem.href === "/student/notifications" && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("resetNotificationsCategory"));
+    }
+    router.push(targetItem.href);
+  };
+
+  // Handle keyboard navigation (ArrowUp, ArrowDown, Enter) on search suggestions
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isSearchOpen || filteredSearchItems.length === 0) {
+      if (e.key === "ArrowDown" && filteredSearchItems.length > 0) {
+        setIsSearchOpen(true);
+        setHighlightedIndex(0);
+        e.preventDefault();
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev + 1) % filteredSearchItems.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev <= 0 ? filteredSearchItems.length - 1 : prev - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const targetItem = highlightedIndex >= 0 ? filteredSearchItems[highlightedIndex] : filteredSearchItems[0];
+      if (targetItem) {
+        onSelectSearchItem(targetItem);
+      }
+    } else if (e.key === "Escape") {
+      setIsSearchOpen(false);
+      setHighlightedIndex(-1);
+    }
+  };
 
   // Keyboard shortcut Ctrl+K to focus search and Escape to dismiss popups
   useEffect(() => {
@@ -313,7 +368,7 @@ export default function StudentLayout({
     router.replace("/");
   };
 
-  const handleGoToNotifications = () => {
+  const handleGoToNotifications = (notificationId?: string) => {
     if (typeof window !== "undefined") {
       const isRemembered = localStorage.getItem("lpu_mess_remember") === "true";
       const token =
@@ -322,6 +377,12 @@ export default function StudentLayout({
       if (token) {
         document.cookie = `lpu_mess_jwt=${token}; path=/; SameSite=Lax`;
       }
+      if (notificationId) {
+        const stored = getStoredNotifications();
+        const updated = stored.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n));
+        saveStoredNotifications(updated);
+      }
+      window.dispatchEvent(new CustomEvent("resetNotificationsCategory"));
     }
     setIsNotificationOpen(false);
   };
@@ -468,7 +529,12 @@ export default function StudentLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsMobileDrawerOpen(false)}
+                onClick={() => {
+                  setIsMobileDrawerOpen(false);
+                  if (item.href === "/student/notifications" && typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("resetNotificationsCategory"));
+                  }
+                }}
                 className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                 title={item.label}
               >
@@ -483,12 +549,11 @@ export default function StudentLayout({
 
         {/* User Card & Logout */}
         <div className={styles.sidebarFooter}>
-          <div className={styles.userCard} title="Tharun Neela (Reg: 12204918)">
+          <div className={styles.userCard} title="Tharun Neela">
             <div className={styles.userAvatar}>TN</div>
             {(!isCollapsed || isMobileDrawerOpen) && (
               <div className={styles.userInfo}>
                 <span className={styles.userName}>Tharun Neela</span>
-                <span className={styles.userRole}>Reg: 12204918</span>
               </div>
             )}
           </div>
@@ -533,13 +598,19 @@ export default function StudentLayout({
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search menu, meals..."
+                placeholder="Search menu, meals, notifications..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setIsSearchOpen(true);
+                  setHighlightedIndex(-1);
                 }}
-                onFocus={() => setIsSearchOpen(true)}
+                onKeyDown={handleSearchKeyDown}
+                onFocus={() => {
+                  if (searchQuery.trim().length > 0) {
+                    setIsSearchOpen(true);
+                  }
+                }}
                 className={styles.searchInput}
                 aria-label="Search meals, services, and pages"
                 id="student-top-search-input"
@@ -550,6 +621,7 @@ export default function StudentLayout({
                   onClick={() => {
                     setSearchQuery("");
                     setIsSearchOpen(false);
+                    setHighlightedIndex(-1);
                   }}
                   className={styles.searchClearBtn}
                   aria-label="Clear search input"
@@ -573,25 +645,40 @@ export default function StudentLayout({
                   />
                   <div className={styles.searchResultsDropdown}>
                     {filteredSearchItems.length > 0 ? (
-                      filteredSearchItems.map((item) => (
+                      filteredSearchItems.map((item, idx) => (
                         <Link
-                          key={item.href}
+                          key={item.id ? `${item.href}-${item.id}` : item.href}
                           href={item.href}
-                          onClick={() => {
-                            setSearchQuery("");
-                            setIsSearchOpen(false);
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onSelectSearchItem(item);
                           }}
-                          className={styles.searchResultItem}
+                          onMouseEnter={() => setHighlightedIndex(idx)}
+                          className={`${styles.searchResultItem} ${highlightedIndex === idx ? styles.searchResultItemActive : ""}`}
                         >
                           <span className={styles.searchResultIcon}>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="9 18 15 12 9 6" />
-                            </svg>
+                            {item.type === "notification" ? (
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                              </svg>
+                            ) : (
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="9 18 15 12 9 6" />
+                              </svg>
+                            )}
                           </span>
-                          <div>
+                          <div style={{ minWidth: 0, flex: 1 }}>
                             <div className={styles.searchResultTitle}>{item.title}</div>
-                            <div className={styles.searchResultCategory}>{item.category}</div>
+                            {item.subtitle ? (
+                              <div className={styles.searchResultSnippet}>{item.subtitle}</div>
+                            ) : (
+                              <div className={styles.searchResultCategory}>{item.category}</div>
+                            )}
                           </div>
+                          {item.type === "notification" && (
+                            <span className={styles.searchResultCategoryBadge}>Notification</span>
+                          )}
                         </Link>
                       ))
                     ) : (
@@ -617,13 +704,13 @@ export default function StudentLayout({
                 id="top-notification-btn"
                 aria-label="View notifications"
                 aria-expanded={isNotificationOpen}
-                title="Notifications (2 unread)"
+                title={unreadNotificationsCount > 0 ? `Notifications (${unreadNotificationsCount} unread)` : "Notifications"}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                   <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                 </svg>
-                <span className={styles.notificationDot} />
+                {unreadNotificationsCount > 0 && <span className={styles.notificationDot} />}
               </button>
 
               {isNotificationOpen && (
@@ -636,14 +723,18 @@ export default function StudentLayout({
                   <div className={styles.notificationDropdown}>
                     <div className={styles.dropdownHeader}>
                       <span className={styles.dropdownTitle}>Notifications</span>
-                      <span className={styles.dropdownBadge}>2 New</span>
+                      {unreadNotificationsCount > 0 ? (
+                        <span className={styles.dropdownBadge}>{unreadNotificationsCount} New</span>
+                      ) : (
+                        <span className={styles.dropdownBadgeCaughtUp}>All Caught Up</span>
+                      )}
                     </div>
                     <div className={styles.notificationList}>
-                      {SAMPLE_NOTIFICATIONS.map((notif) => (
+                      {dropdownNotifications.map((notif) => (
                         <Link
                           key={notif.id}
                           href="/student/notifications"
-                          onClick={handleGoToNotifications}
+                          onClick={() => handleGoToNotifications(notif.id)}
                           className={styles.notificationItem}
                         >
                           <div className={styles.notificationItemTitle}>{notif.title}</div>
@@ -655,7 +746,7 @@ export default function StudentLayout({
                     <div className={styles.dropdownFooter}>
                       <Link
                         href="/student/notifications"
-                        onClick={handleGoToNotifications}
+                        onClick={() => handleGoToNotifications()}
                         className={styles.dropdownFooterBtn}
                         id="view-all-notifications-btn"
                       >
