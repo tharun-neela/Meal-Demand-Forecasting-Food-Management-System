@@ -611,6 +611,61 @@
   border: 2px solid #ffffff;
 }
 
+.notificationBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background-color: #f36f21;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  line-height: 1;
+  box-shadow: 0 2px 5px rgba(243, 111, 33, 0.4);
+  box-sizing: border-box;
+}
+
+.sidebarNavBadge {
+  margin-left: auto;
+  background-color: #f36f21;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.sidebarCollapsedBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 2px;
+  border-radius: 9999px;
+  background-color: #f36f21;
+  color: #ffffff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #0f172a;
+}
+
 .notificationDropdown {
   position: absolute;
   top: calc(100% + 8px);

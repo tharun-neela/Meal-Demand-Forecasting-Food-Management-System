@@ -1,0 +1,593 @@
+/* Meal Analytics Page Styling - High Contrast, Prominent & Colourful */
+
+.analyticsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0.5rem 0 3rem 0;
+  box-sizing: border-box;
+}
+
+/* Page Header & Summary Info */
+.headerSection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.35rem 1.6rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.badgeLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: #fff7ed;
+  color: #ea580c;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid #ffedd5;
+  width: fit-content;
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #f36f21;
+  box-shadow: 0 0 0 2px rgba(243, 111, 33, 0.2);
+  animation: pulseDot 1.8s infinite;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(243, 111, 33, 0.6); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(243, 111, 33, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(243, 111, 33, 0); }
+}
+
+.pageTitle {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.pageSubtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.headerRightPill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+}
+
+/* Part 1: Top KPI Summary Cards */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.15rem;
+  width: 100%;
+}
+
+@media (max-width: 1080px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpiCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.kpiTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kpiIconWrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpiBadgeGreen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: #ecfdf5;
+  color: #059669;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid #a7f3d0;
+}
+
+.kpiBadgeOrange {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: #fff7ed;
+  color: #ea580c;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid #fed7aa;
+}
+
+.kpiBadgeBlue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
+}
+
+.kpiValue {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.kpiLabel {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+}
+
+.kpiSubtext {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: -0.3rem;
+}
+
+/* Part Cards (Main Graph Containers) */
+.chartCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-sizing: border-box;
+}
+
+.chartHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.chartTitleCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.chartTitle {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chartSubtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Segmented Controls & Toggles */
+.toggleControlsGroup {
+  display: inline-flex;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.toggleBtn {
+  background: transparent;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.38rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  font-family: inherit;
+}
+
+.toggleBtn:hover {
+  color: #0f172a;
+}
+
+.toggleBtnActive {
+  background-color: #ffffff;
+  color: #f36f21;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+/* 2-Column Responsive Grid */
+.twoColGrid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.35rem;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .twoColGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Chart Canvas Area */
+.chartCanvasArea {
+  width: 100%;
+  min-height: 290px;
+  position: relative;
+}
+
+/* Custom Tooltip Styling for Recharts - High Contrast */
+.customTooltip {
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 0.75rem 0.95rem;
+  color: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  font-size: 0.82rem;
+  min-width: 150px;
+  z-index: 50;
+}
+
+.tooltipLabel {
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: #f8fafc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 0.3rem;
+  font-size: 0.84rem;
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.tooltipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.4rem;
+}
+
+.tooltipName {
+  color: #cbd5e1;
+  font-size: 0.8rem;
+}
+
+.tooltipValue {
+  font-weight: 700;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Donut Chart Specifics */
+.donutLayout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .donutLayout {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.donutCenterBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donutCenterText {
+  position: absolute;
+  text-align: center;
+  pointer-events: none;
+}
+
+.donutTotalNumber {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.donutTotalLabel {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.donutLegendList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 240px;
+}
+
+.donutLegendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.donutLegendItem:hover {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.donutLegendLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.donutColorBox {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.donutLegendRight {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.donutSharePercent {
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-left: 0.25rem;
+}
+
+/* Day Selector Dropdown for Waste */
+.daySelect {
+  background-color: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 0.38rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  font-family: inherit;
+}
+
+.daySelect:focus {
+  border-color: #f36f21;
+}
+
+/* Part 5: Actionable Insights Section */
+.insightsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.insightsHeader {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.insightsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.15rem;
+}
+
+@media (max-width: 900px) {
+  .insightsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.insightCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.insightIconOrange {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #fff7ed;
+  color: #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.insightIconEmerald {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #ecfdf5;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.insightIconIndigo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #e0e7ff;
+  color: #4338ca;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.insightContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.insightTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.insightText {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.legendBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legendIndicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}

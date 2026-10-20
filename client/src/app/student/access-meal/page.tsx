@@ -16,6 +16,7 @@ interface AttendanceRecord {
 }
 
 const STORAGE_KEY = "student_meal_attendance_records";
+const AUTHORIZED_QR_CODE = "BH1M07";
 
 // Helper to determine ongoing meal based on current local time
 function getCurrentMealInfo(): { name: string; timing: string; id: "breakfast" | "lunch" | "snacks" | "dinner" } {
@@ -39,34 +40,67 @@ function getCurrentMealInfo(): { name: string; timing: string; id: "breakfast" |
     return { name: "Dinner", timing: "07:30 PM – 09:30 PM", id: "dinner" };
   }
 
-  // Off-hours fallback: next upcoming service or Dinner
+  // Off-hours fallback
   if (mins < 420) {
     return { name: "Breakfast", timing: "07:30 AM – 09:30 AM (Upcoming)", id: "breakfast" };
   }
   return { name: "Dinner", timing: "07:30 PM – 09:30 PM", id: "dinner" };
 }
 
-// Crisp scanner success beep using Web Audio API
-function playScanSuccessBeep() {
+// Payment-app style multi-tone chime (like Google Pay / Paytm sound)
+function playPaymentAppChime() {
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
 
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
-    osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.12); // E6 note
+    const playTone = (freq: number, start: number, duration: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + duration);
+    };
 
-    gain.gain.setValueAtTime(0.25, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
+    // Fast 2-step ascending chime (E5 -> B5)
+    playTone(659.25, 0, 0.08);
+    playTone(987.77, 0.07, 0.16);
+  } catch (err) {
+    console.warn("Audio playback not allowed:", err);
+  }
+}
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+// Low buzz error tone when an unauthorized QR code is scanned
+function playRejectionTone() {
+  try {
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
 
-    osc.start();
-    osc.stop(ctx.currentTime + 0.2);
+    const playBuzz = (freq: number, start: number, duration: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + duration);
+    };
+
+    playBuzz(200, 0, 0.12);
+    playBuzz(160, 0.14, 0.16);
   } catch (err) {
     console.warn("Audio playback not allowed:", err);
   }
@@ -81,9 +115,12 @@ const DEFAULT_MEAL_INFO = {
 export default function AccessMealPage() {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isRequestingPermission, setIsRequestingPermission] = useState<boolean>(false);
+  const [isLocked, setIsLocked] = useState<boolean>(false);
+  const [isRejected, setIsRejected] = useState<boolean>(false);
+  const [rejectedCode, setRejectedCode] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<{ title: string; message: string } | null>(null);
-  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const [scannedResult, setScannedResult] = useState<AttendanceRecord | null>(null);
+  const [popupCountdown, setPopupCountdown] = useState<number>(20);
   const [recentRecords, setRecentRecords] = useState<AttendanceRecord[]>([]);
   const [currentMeal, setCurrentMeal] = useState<{ name: string; timing: string; id: string }>(DEFAULT_MEAL_INFO);
 
@@ -91,25 +128,30 @@ export default function AccessMealPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load existing records from localStorage
+  // Concurrency & scanning state refs
+  const isScanningActiveRef = useRef<boolean>(false);
+  const isLockedRef = useRef<boolean>(false);
+  const isCooldownRef = useRef<boolean>(false);
+  const isProcessingFrameRef = useRef<boolean>(false);
+
+  // Initialize ongoing meal and load attendance history from localStorage
   useEffect(() => {
     setCurrentMeal(getCurrentMealInfo());
+
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setRecentRecords(JSON.parse(stored));
       } else {
-        // Default sample records
         const initialSamples: AttendanceRecord[] = [
           {
             id: "att-101",
             mealName: "Dinner",
-            messHall: "Central Mess Hall 2",
+            messHall: "Boys Hostel 1 • Mess Hall 07",
             timestamp: "Today, 08:15 PM",
             dateKey: new Date().toISOString().split("T")[0],
-            qrPayload: "LPU-MESS|12204918|DINNER|HALL-2",
+            qrPayload: "BH1M07",
             verified: true,
           },
         ];
@@ -121,8 +163,44 @@ export default function AccessMealPage() {
     }
   }, []);
 
+  // Dismiss modal and reset all scanning locks cleanly
+  const handleDismissPopup = useCallback(() => {
+    setScannedResult(null);
+    setIsLocked(false);
+    isLockedRef.current = false;
+    isCooldownRef.current = false;
+    isProcessingFrameRef.current = false;
+  }, []);
+
+  // 20-Second Auto-Closing Timer with Live Countdown Display
+  useEffect(() => {
+    if (!scannedResult) {
+      setPopupCountdown(20);
+      return;
+    }
+
+    setPopupCountdown(20);
+    const timer = setInterval(() => {
+      setPopupCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleDismissPopup();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [scannedResult, handleDismissPopup]);
+
   // Stop camera stream cleanly
   const stopCamera = useCallback(() => {
+    isScanningActiveRef.current = false;
+    isProcessingFrameRef.current = false;
+    isLockedRef.current = false;
+    isCooldownRef.current = false;
+
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -140,6 +218,9 @@ export default function AccessMealPage() {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    setIsLocked(false);
+    setIsRejected(false);
+    setRejectedCode(null);
     setIsScanning(false);
     setIsRequestingPermission(false);
   }, []);
@@ -151,31 +232,71 @@ export default function AccessMealPage() {
     };
   }, [stopCamera]);
 
-  // Handle successful QR scan
+  // Handle QR scan with strict validation for BH1M07 only
   const handleScanSuccess = useCallback(
     (codeData: string) => {
-      stopCamera();
-      playScanSuccessBeep();
+      const cleanCode = codeData.trim().toUpperCase();
 
+      // STRICT VALIDATION: ONLY approve the meal for the authorized QR code BH1M07
+      if (cleanCode !== AUTHORIZED_QR_CODE) {
+        if (isCooldownRef.current) return;
+        isCooldownRef.current = true;
+
+        setIsRejected(true);
+        setRejectedCode(cleanCode);
+        playRejectionTone();
+
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try {
+            navigator.vibrate([150, 80, 150]);
+          } catch {
+            // ignore
+          }
+        }
+
+        // Auto-dismiss rejection overlay after 1.2s and immediately resume active scanning
+        setTimeout(() => {
+          setIsRejected(false);
+          setRejectedCode(null);
+          isCooldownRef.current = false;
+        }, 1200);
+
+        return;
+      }
+
+      // Approved! Authorized BH1M07 QR code detected
+      isLockedRef.current = true;
+      isScanningActiveRef.current = false;
+      setIsLocked(true);
+      setIsRejected(false);
+      setRejectedCode(null);
+
+      // Instant payment-app chime & haptic feedback
+      playPaymentAppChime();
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         try {
-          navigator.vibrate([100, 50, 100]);
+          navigator.vibrate([80]);
         } catch {
           // ignore
         }
       }
 
+      // Stop camera after visual lock feedback
+      setTimeout(() => {
+        stopCamera();
+      }, 250);
+
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const meal = getCurrentMealInfo();
+      const current = getCurrentMealInfo();
 
       const newRecord: AttendanceRecord = {
         id: `att-${Date.now()}`,
-        mealName: meal.name,
-        messHall: "Central Mess Hall 2",
+        mealName: current.name,
+        messHall: "Boys Hostel 1 • Mess Hall 07",
         timestamp: `Today, ${timeStr}`,
         dateKey: now.toISOString().split("T")[0],
-        qrPayload: codeData,
+        qrPayload: AUTHORIZED_QR_CODE,
         verified: true,
       };
 
@@ -194,47 +315,111 @@ export default function AccessMealPage() {
     [stopCamera]
   );
 
-  // Scan frame loop using jsQR
+  // High-Speed Continuous Scanning Loop (Dual-Pass: Center Viewfinder Crop + Full Frame Fallback)
   const scanFrame = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current || !streamRef.current) {
+    if (!isScanningActiveRef.current || isLockedRef.current) {
+      return;
+    }
+
+    const scheduleNext = () => {
+      if (isScanningActiveRef.current && !isLockedRef.current) {
+        animFrameRef.current = requestAnimationFrame(scanFrame);
+      }
+    };
+
+    // If temporarily in cooldown (e.g. invalid QR flashed red), keep scheduling without scanning
+    if (isCooldownRef.current) {
+      scheduleNext();
       return;
     }
 
     const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-
-    if (video.readyState === video.HAVE_ENOUGH_DATA && ctx) {
-      const width = video.videoWidth || 320;
-      const height = video.videoHeight || 320;
-
-      canvas.width = width;
-      canvas.height = height;
-
-      ctx.drawImage(video, 0, 0, width, height);
-      const imageData = ctx.getImageData(0, 0, width, height);
-
-      // Decode with jsQR
-      const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "dontInvert",
-      });
-
-      if (code && code.data && code.data.trim().length > 0) {
-        handleScanSuccess(code.data);
-        return; // stop scanning loop
-      }
+    if (!video || video.readyState < video.HAVE_CURRENT_DATA || video.videoWidth === 0) {
+      scheduleNext();
+      return;
     }
 
-    animFrameRef.current = requestAnimationFrame(scanFrame);
+    // Skip frame if already processing previous frame to prevent frame pileup
+    if (isProcessingFrameRef.current) {
+      scheduleNext();
+      return;
+    }
+
+    isProcessingFrameRef.current = true;
+
+    try {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (ctx) {
+          const vW = video.videoWidth;
+          const vH = video.videoHeight;
+
+          // Pass 1: Center-Crop Scan
+          // Users point the QR code directly into the center viewfinder box.
+          // Cropping the center square preserves 100% sharp pixel resolution
+          // while processing a tiny fraction of pixels for ultra-fast <5ms detection.
+          const cropSize = Math.round(Math.min(vW, vH) * 0.75);
+          const cropX = Math.round((vW - cropSize) / 2);
+          const cropY = Math.round((vH - cropSize) / 2);
+
+          const cropTarget = Math.min(420, cropSize);
+
+          if (canvas.width !== cropTarget || canvas.height !== cropTarget) {
+            canvas.width = cropTarget;
+            canvas.height = cropTarget;
+          }
+
+          ctx.drawImage(video, cropX, cropY, cropSize, cropSize, 0, 0, cropTarget, cropTarget);
+          const cropImgData = ctx.getImageData(0, 0, cropTarget, cropTarget);
+          let code = jsQR(cropImgData.data, cropTarget, cropTarget, {
+            inversionAttempts: "attemptBoth",
+          });
+
+          // Pass 2: Full-Frame Fallback (handles QR held near outer edges)
+          if (!code || !code.data) {
+            const fullScale = Math.min(1, 540 / Math.max(vW, vH));
+            const fullW = Math.round(vW * fullScale);
+            const fullH = Math.round(vH * fullScale);
+
+            if (canvas.width !== fullW || canvas.height !== fullH) {
+              canvas.width = fullW;
+              canvas.height = fullH;
+            }
+
+            ctx.drawImage(video, 0, 0, fullW, fullH);
+            const fullImgData = ctx.getImageData(0, 0, fullW, fullH);
+            code = jsQR(fullImgData.data, fullW, fullH, {
+              inversionAttempts: "attemptBoth",
+            });
+          }
+
+          if (code && code.data && code.data.trim().length > 0) {
+            handleScanSuccess(code.data.trim());
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Scan frame error:", err);
+    } finally {
+      isProcessingFrameRef.current = false;
+      scheduleNext();
+    }
   }, [handleScanSuccess]);
 
   // Start the device camera & trigger permission request
-  const startCamera = async (overrideFacingMode?: "environment" | "user") => {
+  const startCamera = async () => {
     setCameraError(null);
     setScannedResult(null);
+    setIsLocked(false);
+    setIsRejected(false);
+    setRejectedCode(null);
+    isLockedRef.current = false;
+    isCooldownRef.current = false;
+    isProcessingFrameRef.current = false;
+    isScanningActiveRef.current = false;
     setIsRequestingPermission(true);
-
-    const mode = overrideFacingMode || facingMode;
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setIsRequestingPermission(false);
@@ -246,20 +431,33 @@ export default function AccessMealPage() {
     }
 
     try {
-      // Stop any existing stream
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
       }
 
-      // Request camera access - prompts the browser permission dialog
+      // Request optimized camera stream with continuous focus and high frame rate
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: mode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 },
+          frameRate: { ideal: 30, max: 60 },
         },
         audio: false,
       });
+
+      // Apply mobile continuous autofocus if supported
+      try {
+        const track = stream.getVideoTracks()[0];
+        const caps = track.getCapabilities?.() as any;
+        if (caps && caps.focusMode && caps.focusMode.includes("continuous")) {
+          await track.applyConstraints({
+            advanced: [{ focusMode: "continuous" } as any],
+          });
+        }
+      } catch {
+        // Ignore constraint errors
+      }
 
       streamRef.current = stream;
       setIsScanning(true);
@@ -269,11 +467,17 @@ export default function AccessMealPage() {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute("playsinline", "true");
         await videoRef.current.play();
+
+        isScanningActiveRef.current = true;
+        if (animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+        }
         animFrameRef.current = requestAnimationFrame(scanFrame);
       }
     } catch (err: unknown) {
       setIsRequestingPermission(false);
       setIsScanning(false);
+      isScanningActiveRef.current = false;
 
       const errorObj = err as { name?: string; message?: string };
       console.warn("Camera permission/access error:", err);
@@ -303,53 +507,6 @@ export default function AccessMealPage() {
     }
   };
 
-  // Switch between front and rear cameras
-  const toggleCameraFacingMode = () => {
-    const nextMode = facingMode === "environment" ? "user" : "environment";
-    setFacingMode(nextMode);
-    if (isScanning) {
-      startCamera(nextMode);
-    }
-  };
-
-  // Allow uploading an image file containing a QR code
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const img = new Image();
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          const imgData = ctx.getImageData(0, 0, img.width, img.height);
-          const code = jsQR(imgData.data, imgData.width, imgData.height);
-          if (code && code.data) {
-            handleScanSuccess(code.data);
-          } else {
-            alert("No valid QR code was detected in the uploaded image. Please try another image.");
-          }
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-
-  // Simulate Attendance Scan for testing/demo
-  const handleSimulateScan = () => {
-    const meal = getCurrentMealInfo();
-    const mockQR = `LPU-MESS-ACCESS|REG:12204918|STUDENT:THARUN-NEELA|MEAL:${meal.name.toUpperCase()}|HALL:CENTRAL-MESS-2|HASH:${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-    handleScanSuccess(mockQR);
-  };
-
   return (
     <div className={styles.pageContainer}>
       {/* Active Service Context Pill */}
@@ -362,15 +519,21 @@ export default function AccessMealPage() {
         </div>
       </div>
 
-      {/* Main Scanner Card (Designed from user's sample photo) */}
+      {/* Main Scanner Card (Faithfully matching sample photo) */}
       <div className={styles.scannerCard}>
         {/* Instruction Title matching sample photo */}
         <h2 className={styles.instructionTitle}>
-          Place QR code in the area to scan your attendance
+          Scan the QR code to Access your meal
         </h2>
 
-        {/* Viewfinder Outer with 4 Corner Brackets */}
-        <div className={`${styles.viewfinderOuter} ${isScanning ? styles.cornersScanning : ""}`}>
+        {/* Viewfinder Outer with 4 Corner Brackets (Green for Approved, Red for Rejected) */}
+        <div
+          className={`${styles.viewfinderOuter} ${
+            isScanning ? styles.cornersScanning : ""
+          } ${isLocked ? styles.cornersLocked : ""} ${
+            isRejected ? styles.cornersRejected : ""
+          }`}
+        >
           <div className={styles.cornerTL} />
           <div className={styles.cornerTR} />
           <div className={styles.cornerBL} />
@@ -392,42 +555,40 @@ export default function AccessMealPage() {
             {/* 2. Live Camera Video Stream */}
             <video
               ref={videoRef}
-              className={`${styles.scannerVideo} ${facingMode === "user" ? styles.videoMirrored : ""}`}
+              className={styles.scannerVideo}
               style={{ display: isScanning && !isRequestingPermission ? "block" : "none" }}
               muted
               playsInline
             />
 
-            {/* Laser Beam Animation when camera is scanning */}
-            {isScanning && !isRequestingPermission && (
+            {/* Active Scanning Visuals (Laser Beam & Target Reticle) */}
+            {isScanning && !isRequestingPermission && !isRejected && (
               <>
+                <div className={styles.targetReticle} />
                 <div className={styles.laserBeam} />
-                <div className={styles.cameraControlsOverlay}>
-                  <button
-                    type="button"
-                    onClick={toggleCameraFacingMode}
-                    className={styles.cameraControlBtn}
-                    title="Switch camera"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M20 10c0-4.4-3.6-8-8-8s-8 3.6-8 8h3l-4 4-4-4h3c0-5.5 4.5-10 10-10s10 4.5 10 10h-2z" />
-                    </svg>
-                    Switch
-                  </button>
-                  <button
-                    type="button"
-                    onClick={stopCamera}
-                    className={styles.cameraControlBtn}
-                    title="Close camera"
-                  >
-                    Close
-                  </button>
-                </div>
               </>
             )}
 
-            {/* 3. Idle QR Code Graphic matching sample photo */}
-            {!isScanning && !isRequestingPermission && !scannedResult && (
+            {/* 3. Rejection Notice when an unauthorized QR is scanned */}
+            {isRejected && rejectedCode && (
+              <div className={styles.invalidScanOverlay}>
+                <div className={styles.invalidScanIcon}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                </div>
+                <div className={styles.invalidScanTitle}>Access Denied</div>
+                <div className={styles.invalidScanText}>
+                  Unauthorized QR code. Meal attendance is only approved for the official BH1M07 mess QR.
+                </div>
+                <span className={styles.invalidScanBadge}>Scanned: {rejectedCode}</span>
+              </div>
+            )}
+
+            {/* 4. Idle QR Code Graphic matching sample photo */}
+            {!isScanning && !isRequestingPermission && !scannedResult && !isRejected && (
               <div className={styles.idleQrPlaceholder}>
                 <svg
                   className={styles.idleQrSvg}
@@ -435,22 +596,18 @@ export default function AccessMealPage() {
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  {/* Top-Left Position Square */}
                   <rect x="10" y="10" width="35" height="35" rx="4" fill="#94a3b8" />
                   <rect x="17" y="17" width="21" height="21" rx="2" fill="#ffffff" />
                   <rect x="23" y="23" width="9" height="9" fill="#94a3b8" />
 
-                  {/* Top-Right Position Square */}
                   <rect x="75" y="10" width="35" height="35" rx="4" fill="#94a3b8" />
                   <rect x="82" y="17" width="21" height="21" rx="2" fill="#ffffff" />
                   <rect x="88" y="23" width="9" height="9" fill="#94a3b8" />
 
-                  {/* Bottom-Left Position Square */}
                   <rect x="10" y="75" width="35" height="35" rx="4" fill="#94a3b8" />
                   <rect x="17" y="82" width="21" height="21" rx="2" fill="#ffffff" />
                   <rect x="23" y="88" width="9" height="9" fill="#94a3b8" />
 
-                  {/* Stylized Center Data Dots */}
                   <rect x="52" y="15" width="8" height="8" rx="1.5" fill="#cbd5e1" />
                   <rect x="62" y="28" width="8" height="8" rx="1.5" fill="#cbd5e1" />
                   <rect x="52" y="42" width="16" height="8" rx="1.5" fill="#cbd5e1" />
@@ -470,10 +627,10 @@ export default function AccessMealPage() {
           </div>
         </div>
 
-        {/* Hidden Canvas used by jsQR to sample frames */}
+        {/* Hidden Canvas used for high-speed frame sampling */}
         <canvas ref={canvasRef} className={styles.hiddenCanvas} />
 
-        {/* Primary Action Button (Matches sample photo orange pill button) */}
+        {/* Primary Action Button (Warm Even Orange Pill Button) */}
         {!isScanning ? (
           <button
             type="button"
@@ -487,7 +644,7 @@ export default function AccessMealPage() {
               <rect x="14" y="14" width="7" height="7" />
               <rect x="3" y="14" width="7" height="7" />
             </svg>
-            <span>Scan to record attendance</span>
+            <span>Scan</span>
           </button>
         ) : (
           <button
@@ -502,44 +659,6 @@ export default function AccessMealPage() {
             <span>Stop Camera</span>
           </button>
         )}
-
-        {/* Secondary Actions (Upload Image / Test Demo Scan) */}
-        <div className={styles.secondaryRow}>
-          <button
-            type="button"
-            className={styles.secondaryLinkBtn}
-            onClick={() => fileInputRef.current?.click()}
-            title="Upload QR Code Image"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <span>Upload Image</span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className={styles.fileInputHidden}
-            onChange={handleFileUpload}
-          />
-
-          <span style={{ color: "#cbd5e1" }}>&bull;</span>
-
-          <button
-            type="button"
-            className={styles.secondaryLinkBtn}
-            onClick={handleSimulateScan}
-            title="Simulate attendance scan for demo"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-            <span>Test Scan (Demo)</span>
-          </button>
-        </div>
 
         {/* Permission Denied or Device Error Notice */}
         {cameraError && (
@@ -561,18 +680,11 @@ export default function AccessMealPage() {
               >
                 Try Again
               </button>
-              <button
-                type="button"
-                className={styles.errorActionBtnSecondary}
-                onClick={handleSimulateScan}
-              >
-                Use Demo Scan
-              </button>
             </div>
           </div>
         )}
 
-        {/* Success Modal Overlay when QR is scanned */}
+        {/* Success Modal Overlay with 20-Second Countdown Timer */}
         {scannedResult && (
           <div className={styles.successOverlay}>
             <div className={styles.successIconWrapper}>
@@ -580,8 +692,17 @@ export default function AccessMealPage() {
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <h3 className={styles.successTitle}>Attendance Recorded!</h3>
+            <h3 className={styles.successTitle}>Meal Access Approved!</h3>
             <p className={styles.successSubtitle}>Your meal access has been successfully authenticated.</p>
+
+            {/* 20-Second Live Timer Display */}
+            <div className={styles.countdownBanner}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>Auto-closing in <span className={styles.countdownTimerDigits}>{popupCountdown}s</span></span>
+            </div>
 
             <div className={styles.attendanceDetailsGrid}>
               <div className={styles.attendanceRow}>
@@ -591,6 +712,12 @@ export default function AccessMealPage() {
               <div className={styles.attendanceRow}>
                 <span className={styles.attendanceLabel}>Mess Location:</span>
                 <span className={styles.attendanceValue}>{scannedResult.messHall}</span>
+              </div>
+              <div className={styles.attendanceRow}>
+                <span className={styles.attendanceLabel}>QR Token:</span>
+                <span className={styles.attendanceValue} style={{ fontFamily: "monospace", letterSpacing: "0.05em" }}>
+                  {scannedResult.qrPayload}
+                </span>
               </div>
               <div className={styles.attendanceRow}>
                 <span className={styles.attendanceLabel}>Date & Time:</span>
@@ -611,22 +738,47 @@ export default function AccessMealPage() {
             </div>
 
             <div className={styles.successActionsRow}>
-              <button
-                type="button"
-                className={styles.secondarySuccessBtn}
-                onClick={() => {
-                  setScannedResult(null);
-                  startCamera();
-                }}
-              >
-                Scan Another
-              </button>
-              <Link href="/student/history" className={styles.primarySuccessBtn}>
+              <Link href="/student/feedback" className={styles.feedbackSuccessBtn} id="popup-give-feedback-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>Give Feedback</span>
+              </Link>
+              <Link href="/student/history" className={styles.historySuccessBtn} id="popup-view-history-btn">
                 View Meal History &rarr;
               </Link>
+              <button
+                type="button"
+                className={styles.closePopupTextBtn}
+                onClick={handleDismissPopup}
+                id="popup-dismiss-btn"
+              >
+                Dismiss now
+              </button>
             </div>
           </div>
         )}
+      </div>
+
+      {/* Quick Feedback Card Redirecting to Feedbacks Page */}
+      <div className={styles.feedbackBannerCard}>
+        <div className={styles.feedbackBannerLeft}>
+          <div className={styles.feedbackBannerIcon}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <div>
+            <div className={styles.feedbackBannerTitle}>Have feedback on your meal?</div>
+            <div className={styles.feedbackBannerSubtitle}>Rate taste, hygiene, or submit feedback to the mess team</div>
+          </div>
+        </div>
+        <Link href="/student/feedback" className={styles.feedbackBannerBtn} id="give-feedback-btn">
+          <span>Give Feedback</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </Link>
       </div>
 
       {/* Recent Scanned Attendance Feed */}

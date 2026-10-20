@@ -212,7 +212,7 @@ export default function StudentLayout({
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(3);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
   const [dropdownNotifications, setDropdownNotifications] = useState<NotificationItem[]>([]);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -220,6 +220,25 @@ export default function StudentLayout({
   const router = useRouter();
 
   const pageHeading = PAGE_TITLES[pathname] || "Dashboard";
+
+  // Dynamically sync notifications and unread count with shared storage
+  useEffect(() => {
+    const syncNotifs = () => {
+      const stored = getStoredNotifications();
+      const count = stored.filter((n) => !n.isRead).length;
+      setUnreadNotificationsCount(count);
+      setDropdownNotifications(stored.slice(0, 5));
+    };
+
+    syncNotifs();
+
+    window.addEventListener("notificationsUpdated", syncNotifs);
+    window.addEventListener("storage", syncNotifs);
+    return () => {
+      window.removeEventListener("notificationsUpdated", syncNotifs);
+      window.removeEventListener("storage", syncNotifs);
+    };
+  }, [pathname]);
 
   // Quick search filtering (searches both pages and student notifications)
   const filteredSearchItems: SearchItemResult[] = useMemo(() => {
@@ -525,6 +544,7 @@ export default function StudentLayout({
         <nav className={styles.navSection}>
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
+            const isNotif = item.href === "/student/notifications";
             return (
               <Link
                 key={item.href}
@@ -538,9 +558,23 @@ export default function StudentLayout({
                 className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                 title={item.label}
               >
-                <span className={styles.navIcon}>{item.icon}</span>
+                <span className={styles.navIcon}>
+                  {item.icon}
+                  {isCollapsed && !isMobileDrawerOpen && isNotif && unreadNotificationsCount > 0 && (
+                    <span className={styles.sidebarCollapsedBadge}>
+                      {unreadNotificationsCount > 9 ? "9+" : unreadNotificationsCount}
+                    </span>
+                  )}
+                </span>
                 {(!isCollapsed || isMobileDrawerOpen) && (
-                  <span className={styles.navLabel}>{item.label}</span>
+                  <>
+                    <span className={styles.navLabel}>{item.label}</span>
+                    {isNotif && unreadNotificationsCount > 0 && (
+                      <span className={styles.sidebarNavBadge}>
+                        {unreadNotificationsCount > 99 ? "99+" : unreadNotificationsCount}
+                      </span>
+                    )}
+                  </>
                 )}
               </Link>
             );
@@ -710,7 +744,11 @@ export default function StudentLayout({
                   <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                   <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                 </svg>
-                {unreadNotificationsCount > 0 && <span className={styles.notificationDot} />}
+                {unreadNotificationsCount > 0 && (
+                  <span className={styles.notificationBadge} id="top-notification-unread-count">
+                    {unreadNotificationsCount > 99 ? "99+" : unreadNotificationsCount}
+                  </span>
+                )}
               </button>
 
               {isNotificationOpen && (
@@ -723,10 +761,8 @@ export default function StudentLayout({
                   <div className={styles.notificationDropdown}>
                     <div className={styles.dropdownHeader}>
                       <span className={styles.dropdownTitle}>Notifications</span>
-                      {unreadNotificationsCount > 0 ? (
+                      {unreadNotificationsCount > 0 && (
                         <span className={styles.dropdownBadge}>{unreadNotificationsCount} New</span>
-                      ) : (
-                        <span className={styles.dropdownBadgeCaughtUp}>All Caught Up</span>
                       )}
                     </div>
                     <div className={styles.notificationList}>
