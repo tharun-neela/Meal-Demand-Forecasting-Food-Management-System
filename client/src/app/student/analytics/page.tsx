@@ -176,28 +176,6 @@ export default function MealAnalyticsPage() {
 
   return (
     <div className={styles.analyticsContainer}>
-      {/* Page Header */}
-      <div className={styles.headerSection}>
-        <div className={styles.headerLeft}>
-          <span className={styles.badgeLive}>
-            <span className={styles.liveDot} />
-            Live Insights Engine
-          </span>
-          <h1 className={styles.pageTitle}>Meal Analytics &amp; Performance Trends</h1>
-          <p className={styles.pageSubtitle}>
-            Comprehensive visual data tracking your meal attendance patterns, mess session usage, food waste composition, and taste rating progression.
-          </p>
-        </div>
-        <div className={styles.headerRightPill}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f36f21" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-          <span>Semester Autumn 2026 &bull; BH1 Mess Hall 07</span>
-        </div>
-      </div>
 
       {/* Part 1: Top KPI Summary Metrics Bar */}
       <div className={styles.kpiGrid}>
@@ -708,66 +686,6 @@ export default function MealAnalyticsPage() {
           </div>
         </div>
       </div>
-
-      {/* Part 5: Actionable Insights & Student Suggestions */}
-      <section className={styles.insightsSection}>
-        <div className={styles.insightsHeader}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f36f21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="16" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12.01" y2="8" />
-          </svg>
-          <span>Key Operational Insights &amp; Recommendations</span>
-        </div>
-
-        <div className={styles.insightsGrid}>
-          {/* Card 1 */}
-          <div className={styles.insightCard}>
-            <div className={styles.insightIconOrange}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            </div>
-            <div className={styles.insightContent}>
-              <h3 className={styles.insightTitle}>Optimal Timing: Lunch Rush</h3>
-              <p className={styles.insightText}>
-                Peak footfall occurs between 12:45 PM &ndash; 01:20 PM (~1,950 students). Scanning before 12:30 PM offers 0 wait time.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className={styles.insightCard}>
-            <div className={styles.insightIconEmerald}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-              </svg>
-            </div>
-            <div className={styles.insightContent}>
-              <h3 className={styles.insightTitle}>Highest Rated Menu Item</h3>
-              <p className={styles.insightText}>
-                Wednesday Paneer Butter Masala &amp; Naan scored a stellar 4.9/5 satisfaction rating from 640 student reviews.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className={styles.insightCard}>
-            <div className={styles.insightIconIndigo}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-            <div className={styles.insightContent}>
-              <h3 className={styles.insightTitle}>Zero-Waste Incentive</h3>
-              <p className={styles.insightText}>
-                Food waste has plummeted by 18.4% since introducing custom portion counters in Boys Hostel 1.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
