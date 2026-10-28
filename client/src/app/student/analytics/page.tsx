@@ -3,147 +3,190 @@
 import { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  ReferenceLine,
-  Area,
 } from "recharts";
 import styles from "./analytics.module.css";
 
-// --- DATASETS ---
-
-// 1. Weekly & Monthly Meal Access Trends (Line Chart)
-const WEEKLY_ACCESS_DATA = [
-  { label: "Mon", accessCount: 4, prevAccessCount: 3, attendancePct: 96 },
-  { label: "Tue", accessCount: 4, prevAccessCount: 4, attendancePct: 98 },
-  { label: "Wed", accessCount: 3, prevAccessCount: 3, attendancePct: 92 },
-  { label: "Thu", accessCount: 4, prevAccessCount: 3, attendancePct: 99 },
-  { label: "Fri", accessCount: 4, prevAccessCount: 3, attendancePct: 95 },
-  { label: "Sat", accessCount: 3, prevAccessCount: 2, attendancePct: 88 },
-  { label: "Sun", accessCount: 3, prevAccessCount: 2, attendancePct: 94 },
-];
-
-const MONTHLY_ACCESS_DATA = [
-  { label: "Week 1", accessCount: 20, prevAccessCount: 18, attendancePct: 89 },
-  { label: "Week 2", accessCount: 22, prevAccessCount: 19, attendancePct: 92 },
-  { label: "Week 3", accessCount: 24, prevAccessCount: 21, attendancePct: 95 },
-  { label: "Week 4", accessCount: 26, prevAccessCount: 22, attendancePct: 98 },
-];
-
-// 2. Breakfast vs Lunch vs Dinner Usage (Grouped Bar Chart)
-const THIS_WEEK_MEAL_COMPARISON = [
-  { day: "Mon", breakfast: 1350, lunch: 1890, dinner: 1720 },
-  { day: "Tue", breakfast: 1420, lunch: 1950, dinner: 1780 },
-  { day: "Wed", breakfast: 1380, lunch: 1910, dinner: 1850 },
-  { day: "Thu", breakfast: 1460, lunch: 1980, dinner: 1810 },
-  { day: "Fri", breakfast: 1390, lunch: 1840, dinner: 1690 },
-  { day: "Sat", breakfast: 1150, lunch: 1620, dinner: 1540 },
-  { day: "Sun", breakfast: 1210, lunch: 1710, dinner: 1630 },
-];
-
-const LAST_WEEK_MEAL_COMPARISON = [
-  { day: "Mon", breakfast: 1280, lunch: 1790, dinner: 1640 },
-  { day: "Tue", breakfast: 1310, lunch: 1820, dinner: 1690 },
-  { day: "Wed", breakfast: 1290, lunch: 1800, dinner: 1710 },
-  { day: "Thu", breakfast: 1340, lunch: 1860, dinner: 1730 },
-  { day: "Fri", breakfast: 1300, lunch: 1750, dinner: 1610 },
-  { day: "Sat", breakfast: 1080, lunch: 1540, dinner: 1460 },
-  { day: "Sun", breakfast: 1140, lunch: 1620, dinner: 1520 },
-];
-
-// 3. Daily Waste Composition Donut Chart Dataset by Day
-interface WasteShare {
-  name: string;
-  weightKg: number;
-  color: string;
+// Helper for calculating exact SVG donut arc paths
+function polarToCartesian(cx: number, cy: number, radius: number, angleInDegrees: number) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+  return {
+    x: Number((cx + radius * Math.cos(angleInRadians)).toFixed(3)),
+    y: Number((cy + radius * Math.sin(angleInRadians)).toFixed(3)),
+  };
 }
 
-const DAILY_WASTE_RECORDS: Record<string, { totalKg: number; breakdown: WasteShare[] }> = {
-  today: {
-    totalKg: 38.4,
-    breakdown: [
-      { name: "Breakfast Waste", weightKg: 7.6, color: "#f59e0b" },
-      { name: "Lunch Waste", weightKg: 17.2, color: "#ef4444" },
-      { name: "Snacks Waste", weightKg: 4.2, color: "#06b6d4" },
-      { name: "Dinner Waste", weightKg: 9.4, color: "#8b5cf6" },
-    ],
-  },
-  yesterday: {
-    totalKg: 44.2,
-    breakdown: [
-      { name: "Breakfast Waste", weightKg: 9.1, color: "#f59e0b" },
-      { name: "Lunch Waste", weightKg: 20.3, color: "#ef4444" },
-      { name: "Snacks Waste", weightKg: 4.8, color: "#06b6d4" },
-      { name: "Dinner Waste", weightKg: 10.0, color: "#8b5cf6" },
-    ],
-  },
-  sunday: {
-    totalKg: 51.5,
-    breakdown: [
-      { name: "Breakfast Waste", weightKg: 11.2, color: "#f59e0b" },
-      { name: "Lunch Waste", weightKg: 23.4, color: "#ef4444" },
-      { name: "Snacks Waste", weightKg: 5.4, color: "#06b6d4" },
-      { name: "Dinner Waste", weightKg: 11.5, color: "#8b5cf6" },
-    ],
-  },
-  saturday: {
-    totalKg: 47.8,
-    breakdown: [
-      { name: "Breakfast Waste", weightKg: 10.5, color: "#f59e0b" },
-      { name: "Lunch Waste", weightKg: 21.8, color: "#ef4444" },
-      { name: "Snacks Waste", weightKg: 4.9, color: "#06b6d4" },
-      { name: "Dinner Waste", weightKg: 10.6, color: "#8b5cf6" },
-    ],
-  },
-};
+function describeDonutArc(
+  cx: number,
+  cy: number,
+  rInner: number,
+  rOuter: number,
+  startAngle: number,
+  endAngle: number
+) {
+  const p1 = polarToCartesian(cx, cy, rOuter, startAngle);
+  const p2 = polarToCartesian(cx, cy, rOuter, endAngle);
+  const p3 = polarToCartesian(cx, cy, rInner, endAngle);
+  const p4 = polarToCartesian(cx, cy, rInner, startAngle);
+  const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
 
-// 4. Taste Improvement & Feedback Trends (Line Chart)
-const WEEKLY_TASTE_DATA = [
-  { label: "Mon", tasteRating: 4.10, qualityScore: 82 },
-  { label: "Tue", tasteRating: 4.25, qualityScore: 85 },
-  { label: "Wed", tasteRating: 4.40, qualityScore: 88 },
-  { label: "Thu", tasteRating: 4.55, qualityScore: 91 },
-  { label: "Fri", tasteRating: 4.65, qualityScore: 93 },
-  { label: "Sat", tasteRating: 4.72, qualityScore: 95 },
-  { label: "Sun", tasteRating: 4.80, qualityScore: 97 },
+  return `M ${p1.x} ${p1.y} A ${rOuter} ${rOuter} 0 ${largeArcFlag} 1 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${rInner} ${rInner} 0 ${largeArcFlag} 0 ${p4.x} ${p4.y} Z`;
+}
+
+interface WasteItem {
+  name: string;
+  weightKg: number;
+  percentage: number;
+  color: string;
+  stroke: string;
+  dotColor: string;
+  dotBorder?: string;
+  timing: string;
+}
+
+// Daily meal waste breakdown in order: (Breakfast, Lunch, Snack, Dinner)
+const DAILY_WASTE_DATA: WasteItem[] = [
+  {
+    name: "Breakfast",
+    weightKg: 16.6,
+    percentage: 20,
+    color: "#2563eb", // Blue
+    stroke: "#ffffff",
+    dotColor: "#2563eb",
+    timing: "07:30 AM - 10:00 AM",
+  },
+  {
+    name: "Lunch",
+    weightKg: 24.9,
+    percentage: 30,
+    color: "#fbf6ee", // White / Soft Cream from sample pic
+    stroke: "#e2e8f0",
+    dotColor: "#fbf6ee",
+    dotBorder: "1.5px solid #94a3b8",
+    timing: "12:00 PM - 02:30 PM",
+  },
+  {
+    name: "Snack",
+    weightKg: 0,
+    percentage: 0,
+    color: "#c026d3", // Snack signature purple
+    stroke: "#ffffff",
+    dotColor: "#c026d3",
+    timing: "04:30 PM - 06:00 PM",
+  },
+  {
+    name: "Dinner",
+    weightKg: 41.5,
+    percentage: 50,
+    color: "#f36f21", // Website signature orange
+    stroke: "#ffffff",
+    dotColor: "#f36f21",
+    timing: "07:30 PM - 10:00 PM",
+  },
 ];
 
-const MONTHLY_TASTE_DATA = [
-  { label: "May", tasteRating: 3.85, qualityScore: 76 },
-  { label: "Jun", tasteRating: 4.05, qualityScore: 80 },
-  { label: "Jul", tasteRating: 4.20, qualityScore: 84 },
-  { label: "Aug", tasteRating: 4.42, qualityScore: 89 },
-  { label: "Sep", tasteRating: 4.60, qualityScore: 93 },
-  { label: "Oct", tasteRating: 4.80, qualityScore: 97 },
+const TOTAL_WASTE_KG = 83;
+
+// ============================================================
+// MONTHLY MEAL ACCESS DATASET (12 Months, 4 Grouped Sessions)
+// ============================================================
+interface MonthlyMealRecord {
+  month: string;
+  fullName: string;
+  breakfast: number;
+  lunch: number;
+  snacks: number;
+  dinner: number;
+}
+
+const MONTHLY_MEAL_ACCESS_DATA: MonthlyMealRecord[] = [
+  { month: "Jan", fullName: "January", breakfast: 30, lunch: 29, snacks: 24, dinner: 28 },
+  { month: "Feb", fullName: "February", breakfast: 26, lunch: 27, snacks: 20, dinner: 26 },
+  { month: "Mar", fullName: "March", breakfast: 29, lunch: 30, snacks: 25, dinner: 29 },
+  { month: "Apr", fullName: "April", breakfast: 28, lunch: 29, snacks: 22, dinner: 28 },
+  { month: "May", fullName: "May", breakfast: 18, lunch: 20, snacks: 14, dinner: 19 },
+  { month: "Jun", fullName: "June", breakfast: 5, lunch: 6, snacks: 4, dinner: 6 },
+  { month: "Jul", fullName: "July", breakfast: 12, lunch: 15, snacks: 10, dinner: 14 },
+  { month: "Aug", fullName: "August", breakfast: 29, lunch: 31, snacks: 26, dinner: 30 },
+  { month: "Sep", fullName: "September", breakfast: 28, lunch: 30, snacks: 25, dinner: 29 },
+  { month: "Oct", fullName: "October", breakfast: 27, lunch: 28, snacks: 23, dinner: 28 },
+  { month: "Nov", fullName: "November", breakfast: 29, lunch: 30, snacks: 26, dinner: 30 },
+  { month: "Dec", fullName: "December", breakfast: 22, lunch: 24, snacks: 18, dinner: 22 },
 ];
 
-// Custom High-Contrast Tooltip Component
-function CustomChartTooltip({ active, payload, label, unit = "" }: any) {
+// Interactive High-Contrast Tooltip for Grouped Bar Chart
+function CustomBarTooltip({ active, payload, label }: any) {
   if (active && payload && payload.length) {
+    const data = payload[0]?.payload;
+    if (!data) return null;
+    const total =
+      (data.breakfast || 0) +
+      (data.lunch || 0) +
+      (data.snacks || 0) +
+      (data.dinner || 0);
+
     return (
-      <div className={styles.customTooltip}>
-        <div className={styles.tooltipLabel}>{label}</div>
-        {payload.map((entry: any, index: number) => (
-          <div key={`item-${index}`} className={styles.tooltipRow}>
-            <span style={{ display: "flex", alignItems: "center" }}>
-              <span className={styles.tooltipDot} style={{ backgroundColor: entry.color || entry.stroke || entry.fill }} />
-              <span className={styles.tooltipName}>{entry.name}:</span>
-            </span>
-            <span className={styles.tooltipValue}>
-              {entry.value} {unit}
+      <div className={styles.barTooltipContainer}>
+        <div className={styles.barTooltipHeader}>
+          <span className={styles.barTooltipMonth}>{data.fullName || label}</span>
+          <span className={styles.barTooltipTotal}>{total} Meals Accessed</span>
+        </div>
+        <div className={styles.barTooltipDivider} />
+        <div className={styles.barTooltipRows}>
+          <div className={styles.barTooltipRow}>
+            <div className={styles.barTooltipLeft}>
+              <span
+                className={styles.legendColorDot}
+                style={{ backgroundColor: "#2563eb" }}
+              />
+              <span className={styles.barTooltipName}>Breakfast:</span>
+            </div>
+            <span className={styles.barTooltipVal}>
+              <strong>{data.breakfast}</strong> breakfast accessed in {label}
             </span>
           </div>
-        ))}
+          <div className={styles.barTooltipRow}>
+            <div className={styles.barTooltipLeft}>
+              <span
+                className={styles.legendColorDot}
+                style={{ backgroundColor: "#0f172a" }}
+              />
+              <span className={styles.barTooltipName}>Lunch:</span>
+            </div>
+            <span className={styles.barTooltipVal}>
+              <strong>{data.lunch}</strong> lunch accessed in {label}
+            </span>
+          </div>
+          <div className={styles.barTooltipRow}>
+            <div className={styles.barTooltipLeft}>
+              <span
+                className={styles.legendColorDot}
+                style={{ backgroundColor: "#10b981" }}
+              />
+              <span className={styles.barTooltipName}>Snacks:</span>
+            </div>
+            <span className={styles.barTooltipVal}>
+              <strong>{data.snacks}</strong> snacks accessed in {label}
+            </span>
+          </div>
+          <div className={styles.barTooltipRow}>
+            <div className={styles.barTooltipLeft}>
+              <span
+                className={styles.legendColorDot}
+                style={{ backgroundColor: "#f36f21" }}
+              />
+              <span className={styles.barTooltipName}>Dinner:</span>
+            </div>
+            <span className={styles.barTooltipVal}>
+              <strong>{data.dinner}</strong> dinner accessed in {label}
+            </span>
+          </div>
+        </div>
       </div>
     );
   }
@@ -151,445 +194,555 @@ function CustomChartTooltip({ active, payload, label, unit = "" }: any) {
 }
 
 export default function MealAnalyticsPage() {
+  const [showInfoModal, setShowInfoModal] = useState<boolean>(false);
+  const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
+
+  // Grouped bar chart controls
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [selectedYear, setSelectedYear] = useState<string>("2024");
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
 
-  // Filter state for Chart 1: Meal Access Trend
-  const [accessTimeframe, setAccessTimeframe] = useState<"weekly" | "monthly">("weekly");
-
-  // Filter state for Chart 2: Grouped Bar Chart
-  const [mealComparisonPeriod, setMealComparisonPeriod] = useState<"thisWeek" | "lastWeek">("thisWeek");
-
-  // Filter state for Chart 3: Donut Chart Selected Day
-  const [selectedWasteDay, setSelectedWasteDay] = useState<string>("today");
-
-  // Filter state for Chart 4: Taste Trend
-  const [tasteTimeframe, setTasteTimeframe] = useState<"weekly" | "monthly">("weekly");
+  // Simultaneous rapid count-up state for cards & donut graph
+  const [counts, setCounts] = useState({
+    accessed: 0,
+    missed: 0,
+    moneyLost: 0,
+    waste: 0,
+  });
 
   useEffect(() => {
     setIsMounted(true);
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      setCounts({
+        accessed: 170,
+        missed: 30,
+        moneyLost: 1500,
+        waste: 83,
+      });
+      return;
+    }
+
+    const duration = 1200; // 1.2s rapid simultaneous counter
+    let animationFrameId: number;
+    let startTimestamp: number | null = null;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const elapsed = timestamp - startTimestamp;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // easeOutCubic: rapid initial surge, smoothly decelerates into final numbers
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      setCounts({
+        accessed: Math.round(ease * 170),
+        missed: Math.round(ease * 30),
+        moneyLost: Math.round(ease * 1500),
+        waste: Math.round(ease * 83),
+      });
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setCounts({
+          accessed: 170,
+          missed: 30,
+          moneyLost: 1500,
+          waste: 83,
+        });
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, []);
 
-  const accessData = accessTimeframe === "weekly" ? WEEKLY_ACCESS_DATA : MONTHLY_ACCESS_DATA;
-  const mealComparisonData = mealComparisonPeriod === "thisWeek" ? THIS_WEEK_MEAL_COMPARISON : LAST_WEEK_MEAL_COMPARISON;
-  const currentWasteRecord = DAILY_WASTE_RECORDS[selectedWasteDay] || DAILY_WASTE_RECORDS.today;
-  const tasteData = tasteTimeframe === "weekly" ? WEEKLY_TASTE_DATA : MONTHLY_TASTE_DATA;
+  // SVG Geometry
+  const cx = 105;
+  const cy = 105;
+  const rOuter = 88;
+  const rInner = 58;
+
+  // Donut slices matching reference photo:
+  // 1. Dinner (Orange) on the right side: 0° to 180° (50%)
+  const orangePath = describeDonutArc(cx, cy, rInner, rOuter, 0.05, 179.95);
+  // 2. Lunch (White) on the bottom-left: 180° to 288° (30%)
+  const whitePath = describeDonutArc(cx, cy, rInner, rOuter, 180.05, 287.95);
+  // 3. Breakfast (Blue) on the top-left: 288° to 360° (20%)
+  const bluePath = describeDonutArc(cx, cy, rInner, rOuter, 288.05, 359.95);
 
   return (
     <div className={styles.analyticsContainer}>
+      {/* ============================================================
+          LEFT COLUMN: 3 Top Summary Cards (Side by Side with Donut Card)
+          ============================================================ */}
+      <div className={styles.leftColumn}>
+        <section className={styles.topCardsGrid} aria-label="Student meal access summary">
+          {/* Card 1: Accessed Meals */}
+          <div className={`${styles.topCard} ${styles.heroCard}`}>
+            <div className={styles.cardHeaderCol}>
+              <h3 className={styles.titleWhite}>Accessed</h3>
+              <span className={styles.subLabelWhite}>Mess Provided</span>
+            </div>
 
-
-      {/* Part 2: Weekly / Monthly Meal Access Trend (Line Chart - Req 3) */}
-      <div className={styles.chartCard}>
-        <div className={styles.chartHeader}>
-          <div className={styles.chartTitleCol}>
-            <h2 className={styles.chartTitle}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f36f21" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              Meal Access Trend &bull; Rising Usage Analysis
-            </h2>
-            <p className={styles.chartSubtitle}>
-              Shows whether your meal attendance and student check-ins are rising or falling across {accessTimeframe === "weekly" ? "the current week" : "the current month"}
-            </p>
+            <div className={styles.bigNumberRow}>
+              <div className={styles.bigNumberWhite}>{counts.accessed}</div>
+            </div>
           </div>
 
-          <div className={styles.toggleControlsGroup}>
-            <button
-              type="button"
-              className={`${styles.toggleBtn} ${accessTimeframe === "weekly" ? styles.toggleBtnActive : ""}`}
-              onClick={() => setAccessTimeframe("weekly")}
-              id="trend-weekly-btn"
-            >
-              Weekly View
-            </button>
-            <button
-              type="button"
-              className={`${styles.toggleBtn} ${accessTimeframe === "monthly" ? styles.toggleBtnActive : ""}`}
-              onClick={() => setAccessTimeframe("monthly")}
-              id="trend-monthly-btn"
-            >
-              Monthly View
-            </button>
-          </div>
-        </div>
+          {/* Card 2: Missed Meals */}
+          <div className={`${styles.topCard} ${styles.whiteCard}`}>
+            <div className={styles.cardHeaderCol}>
+              <h3 className={styles.titleDark}>Missed</h3>
+              <span className={styles.subLabelDark}>Not Accessed</span>
+            </div>
 
-        <div className={styles.chartCanvasArea}>
+            <div className={styles.bigNumberRow}>
+              <div className={styles.bigNumberDark}>{counts.missed}</div>
+            </div>
+          </div>
+
+          {/* Card 3: Money Lost */}
+          <div className={`${styles.topCard} ${styles.whiteCard}`}>
+            <div className={styles.cardHeaderCol}>
+              <h3 className={styles.titleDark}>Money Lost</h3>
+              <span className={styles.subLabelDark}>₹50 / Meal</span>
+            </div>
+
+            <div className={styles.bigNumberRow}>
+              <div className={styles.bigNumberDark}>₹{counts.moneyLost.toLocaleString("en-IN")}</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================
+            GROUPED BAR CHART: Monthly Meals Accessed (12 Months, 4 Sessions)
+            ============================================================ */}
+        <div className={styles.yearlyChartCard}>
+          {/* Header Row: Title & Controls */}
+          <div className={styles.chartHeaderRow}>
+            {/* Title with dropdown indicator */}
+            <div
+              className={styles.chartTitleWrapper}
+              onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
+              title="Change Academic Year"
+            >
+              <h2 className={styles.chartMainTitle}>Meals Accessed Yearly</h2>
+              <span
+                className={styles.chartChevron}
+                style={{
+                  transform: isYearDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+
+              {isYearDropdownOpen && (
+                <div
+                  className={styles.yearDropdownMenu}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {["2024", "2025"].map((yr) => (
+                    <button
+                      key={yr}
+                      type="button"
+                      className={`${styles.filterMenuItem} ${selectedYear === yr ? styles.filterMenuItemActive : ""}`}
+                      onClick={() => {
+                        setSelectedYear(yr);
+                        setIsYearDropdownOpen(false);
+                      }}
+                    >
+                      <span>Academic Year {yr}</span>
+                      {selectedYear === yr && <span>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Legend Pills & Filter Button */}
+            <div className={styles.chartControlsRight}>
+              <div className={styles.chartLegendPills}>
+                <span className={styles.legendPill}>
+                  <span className={styles.legendColorDot} style={{ backgroundColor: "#2563eb" }} />
+                  Breakfast
+                </span>
+                <span className={styles.legendPill}>
+                  <span className={styles.legendColorDot} style={{ backgroundColor: "#0f172a" }} />
+                  Lunch
+                </span>
+                <span className={styles.legendPill}>
+                  <span className={styles.legendColorDot} style={{ backgroundColor: "#10b981" }} />
+                  Snacks
+                </span>
+                <span className={styles.legendPill}>
+                  <span className={styles.legendColorDot} style={{ backgroundColor: "#f36f21" }} />
+                  Dinner
+                </span>
+              </div>
+
+              {/* Filter Dropdown */}
+              <div className={styles.filterDropdownWrapper}>
+                <button
+                  type="button"
+                  className={styles.filterBtn}
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  aria-label="Filter sessions"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="4" y1="21" x2="4" y2="14" />
+                    <line x1="4" y1="10" x2="4" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12" y2="3" />
+                    <line x1="20" y1="21" x2="20" y2="16" />
+                    <line x1="20" y1="12" x2="20" y2="3" />
+                    <line x1="1" y1="14" x2="7" y2="14" />
+                    <line x1="9" y1="8" x2="15" y2="8" />
+                    <line x1="17" y1="16" x2="23" y2="16" />
+                  </svg>
+                  <span>{selectedFilter === "all" ? "Filter" : selectedFilter}</span>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                      transform: isFilterOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.15s ease",
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+
+                {isFilterOpen && (
+                  <div className={styles.filterMenu}>
+                    {[
+                      { key: "all", label: "All Sessions (4)" },
+                      { key: "Breakfast", label: "Breakfast Only" },
+                      { key: "Lunch", label: "Lunch Only" },
+                      { key: "Snacks", label: "Snacks Only" },
+                      { key: "Dinner", label: "Dinner Only" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        className={`${styles.filterMenuItem} ${selectedFilter === opt.key ? styles.filterMenuItemActive : ""}`}
+                        onClick={() => {
+                          setSelectedFilter(opt.key);
+                          setIsFilterOpen(false);
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        {selectedFilter === opt.key && <span>✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Grouped Bar Chart Render */}
           {isMounted ? (
-            <ResponsiveContainer width="100%" height={310}>
-              <LineChart data={accessData} margin={{ top: 15, right: 25, left: -10, bottom: 5 }}>
-                <defs>
-                  <linearGradient id="accessLineGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f36f21" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#f36f21" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+            <ResponsiveContainer width="100%" height={295}>
+              <BarChart
+                data={MONTHLY_MEAL_ACCESS_DATA}
+                margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
+                barGap={3}
+                barCategoryGap="26%"
+              >
+                <CartesianGrid
+                  strokeDasharray="4 4"
+                  vertical={false}
+                  stroke="#e2e8f0"
+                />
                 <XAxis
-                  dataKey="label"
-                  stroke="#94a3b8"
-                  fontSize={12}
+                  dataKey="month"
+                  axisLine={false}
                   tickLine={false}
-                  axisLine={{ stroke: "#e2e8f0" }}
+                  tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }}
+                  dy={6}
                 />
                 <YAxis
-                  stroke="#94a3b8"
-                  fontSize={12}
+                  axisLine={false}
                   tickLine={false}
-                  axisLine={{ stroke: "#e2e8f0" }}
-                  domain={[0, accessTimeframe === "weekly" ? 5 : 30]}
+                  tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
+                  domain={[0, 40]}
+                  ticks={[0, 10, 20, 30, 40]}
+                  dx={-4}
                 />
-                <Tooltip content={<CustomChartTooltip unit="Meals" />} />
-                <Legend
-                  verticalAlign="top"
-                  align="right"
-                  height={36}
-                  iconType="circle"
-                  formatter={(value) => <span style={{ color: "#334155", fontSize: "0.82rem", fontWeight: 600 }}>{value}</span>}
+                <Tooltip
+                  content={<CustomBarTooltip />}
+                  cursor={{ fill: "rgba(241, 245, 249, 0.6)", radius: 6 }}
                 />
-                {/* Secondary Reference / Comparison Line */}
-                <Line
-                  type="linear"
-                  dataKey="prevAccessCount"
-                  name="Previous Period"
-                  stroke="#94a3b8"
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  dot={{ r: 3, fill: "#94a3b8" }}
-                />
-                {/* Primary High-Contrast Line */}
-                <Line
-                  type="linear"
-                  dataKey="accessCount"
-                  name="Current Access (Rising)"
-                  stroke="#f36f21"
-                  strokeWidth={3.5}
-                  dot={{ r: 5, fill: "#f36f21", strokeWidth: 2, stroke: "#ffffff" }}
-                  activeDot={{ r: 7, fill: "#ea580c", strokeWidth: 3, stroke: "#ffffff" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div style={{ height: 310, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>
-              Loading interactive trend graph...
-            </div>
-          )}
-        </div>
-
-        <div className={styles.legendBar}>
-          <div className={styles.legendItem}>
-            <span className={styles.legendIndicator} style={{ backgroundColor: "#f36f21" }} />
-            <span>Active Attendance: <strong>Rising steadily</strong> (Peak: Thu at 99%)</span>
-          </div>
-          <div className={styles.legendItem}>
-            <span className={styles.legendIndicator} style={{ backgroundColor: "#94a3b8" }} />
-            <span>Baseline Comparison: +14.2% increase above previous timeline</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Part 3: Two-Column Section (Grouped Bar Chart & Donut Chart - Req 4 & 5) */}
-      <div className={styles.twoColGrid}>
-        {/* Left Column: Breakfast vs Lunch vs Dinner Usage (Req 4) */}
-        <div className={styles.chartCard}>
-          <div className={styles.chartHeader}>
-            <div className={styles.chartTitleCol}>
-              <h2 className={styles.chartTitle}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10" />
-                  <line x1="12" y1="20" x2="12" y2="4" />
-                  <line x1="6" y1="20" x2="6" y2="14" />
-                </svg>
-                Breakfast vs. Lunch vs. Dinner Usage
-              </h2>
-              <p className={styles.chartSubtitle}>
-                Grouped comparison of meal sessions across weekdays
-              </p>
-            </div>
-
-            <div className={styles.toggleControlsGroup}>
-              <button
-                type="button"
-                className={`${styles.toggleBtn} ${mealComparisonPeriod === "thisWeek" ? styles.toggleBtnActive : ""}`}
-                onClick={() => setMealComparisonPeriod("thisWeek")}
-                id="bar-this-week-btn"
-              >
-                This Week
-              </button>
-              <button
-                type="button"
-                className={`${styles.toggleBtn} ${mealComparisonPeriod === "lastWeek" ? styles.toggleBtnActive : ""}`}
-                onClick={() => setMealComparisonPeriod("lastWeek")}
-                id="bar-last-week-btn"
-              >
-                Last Week
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.chartCanvasArea}>
-            {isMounted ? (
-              <ResponsiveContainer width="100%" height={290}>
-                <BarChart data={mealComparisonData} margin={{ top: 15, right: 15, left: -10, bottom: 5 }} barGap={3}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis
-                    dataKey="day"
-                    stroke="#94a3b8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={{ stroke: "#e2e8f0" }}
-                  />
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={{ stroke: "#e2e8f0" }}
-                  />
-                  <Tooltip content={<CustomChartTooltip unit="Students" />} />
-                  <Legend
-                    verticalAlign="top"
-                    align="right"
-                    height={36}
-                    iconType="rect"
-                    formatter={(value) => <span style={{ color: "#334155", fontSize: "0.8rem", fontWeight: 600 }}>{value}</span>}
-                  />
-                  {/* Breakfast - High Contrast Amber Gold */}
+                {(selectedFilter === "all" || selectedFilter === "Breakfast") && (
                   <Bar
                     dataKey="breakfast"
                     name="Breakfast"
-                    fill="#f59e0b"
-                    radius={[5, 5, 0, 0]}
-                    maxBarSize={22}
+                    fill="#2563eb"
+                    radius={[3.5, 3.5, 0, 0]}
+                    maxBarSize={8.5}
                   />
-                  {/* Lunch - High Contrast Teal Cyan */}
+                )}
+                {(selectedFilter === "all" || selectedFilter === "Lunch") && (
                   <Bar
                     dataKey="lunch"
                     name="Lunch"
-                    fill="#06b6d4"
-                    radius={[5, 5, 0, 0]}
-                    maxBarSize={22}
+                    fill="#0f172a"
+                    radius={[3.5, 3.5, 0, 0]}
+                    maxBarSize={8.5}
                   />
-                  {/* Dinner - High Contrast Royal Indigo */}
+                )}
+                {(selectedFilter === "all" || selectedFilter === "Snacks") && (
+                  <Bar
+                    dataKey="snacks"
+                    name="Snacks"
+                    fill="#10b981"
+                    radius={[3.5, 3.5, 0, 0]}
+                    maxBarSize={8.5}
+                  />
+                )}
+                {(selectedFilter === "all" || selectedFilter === "Dinner") && (
                   <Bar
                     dataKey="dinner"
                     name="Dinner"
-                    fill="#6366f1"
-                    radius={[5, 5, 0, 0]}
-                    maxBarSize={22}
+                    fill="#f36f21"
+                    radius={[3.5, 3.5, 0, 0]}
+                    maxBarSize={8.5}
                   />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div style={{ height: 290, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>
-                Loading meal comparison chart...
-              </div>
-            )}
-          </div>
-
-          <div className={styles.legendBar}>
-            <div className={styles.legendItem}>
-              <span className={styles.legendIndicator} style={{ backgroundColor: "#06b6d4" }} />
-              <span>Lunch has the highest student volume (~1,950 peak daily attendance)</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Daily Waste Composition Donut Chart (Req 5) */}
-        <div className={styles.chartCard}>
-          <div className={styles.chartHeader}>
-            <div className={styles.chartTitleCol}>
-              <h2 className={styles.chartTitle}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                  <path d="M22 12A10 10 0 0 0 12 2v10z" />
-                </svg>
-                Daily Waste Composition
-              </h2>
-              <p className={styles.chartSubtitle}>
-                Meal share of selected day&apos;s total mess food waste
-              </p>
-            </div>
-
-            {/* Interactive Day Selector */}
-            <select
-              className={styles.daySelect}
-              value={selectedWasteDay}
-              onChange={(e) => setSelectedWasteDay(e.target.value)}
-              id="waste-day-select"
-              aria-label="Select day for waste composition"
-            >
-              <option value="today">Today (Tue, Oct 20)</option>
-              <option value="yesterday">Yesterday (Mon, Oct 19)</option>
-              <option value="sunday">Sunday (Oct 18)</option>
-              <option value="saturday">Saturday (Oct 17)</option>
-            </select>
-          </div>
-
-          <div className={styles.donutLayout}>
-            {/* Donut Chart with Centered Total Number */}
-            <div className={styles.donutCenterBox}>
-              {isMounted ? (
-                <PieChart width={220} height={220}>
-                  <Pie
-                    data={currentWasteRecord.breakdown}
-                    dataKey="weightKg"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={68}
-                    outerRadius={98}
-                    paddingAngle={3}
-                  >
-                    {currentWasteRecord.breakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomChartTooltip unit="kg" />} />
-                </PieChart>
-              ) : (
-                <div style={{ width: 220, height: 220 }} />
-              )}
-              {/* Centered Total Stat Overlay */}
-              <div className={styles.donutCenterText}>
-                <div className={styles.donutTotalNumber}>{currentWasteRecord.totalKg}</div>
-                <div className={styles.donutTotalLabel}>kg Total Waste</div>
-              </div>
-            </div>
-
-            {/* Side Legend & Percentage Breakdown */}
-            <div className={styles.donutLegendList}>
-              {currentWasteRecord.breakdown.map((item) => {
-                const pct = Math.round((item.weightKg / currentWasteRecord.totalKg) * 100);
-                return (
-                  <div key={item.name} className={styles.donutLegendItem}>
-                    <div className={styles.donutLegendLeft}>
-                      <span className={styles.donutColorBox} style={{ backgroundColor: item.color }} />
-                      <span>{item.name.replace(" Waste", "")}</span>
-                    </div>
-                    <div className={styles.donutLegendRight}>
-                      <span>{item.weightKg} kg</span>
-                      <span className={styles.donutSharePercent}>({pct}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className={styles.legendBar}>
-            <span style={{ fontSize: "0.78rem", color: "#64748b" }}>
-              💡 <strong>Action:</strong> Lunch generates {Math.round((currentWasteRecord.breakdown[1].weightKg / currentWasteRecord.totalKg) * 100)}% of waste. Portion self-selection has reduced bread waste by 22%.
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Part 4: Food Taste & Quality Improvement Trend (Line Chart - Req 6) */}
-      <div className={styles.chartCard}>
-        <div className={styles.chartHeader}>
-          <div className={styles.chartTitleCol}>
-            <h2 className={styles.chartTitle}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-              Food Taste Improvement &amp; Student Feedback Trend
-            </h2>
-            <p className={styles.chartSubtitle}>
-              Continuous taste rating progression out of 5 stars, showing the measurable quality jump following student feedback
-            </p>
-          </div>
-
-          <div className={styles.toggleControlsGroup}>
-            <button
-              type="button"
-              className={`${styles.toggleBtn} ${tasteTimeframe === "weekly" ? styles.toggleBtnActive : ""}`}
-              onClick={() => setTasteTimeframe("weekly")}
-              id="taste-weekly-btn"
-            >
-              Weekly (Day-by-Day)
-            </button>
-            <button
-              type="button"
-              className={`${styles.toggleBtn} ${tasteTimeframe === "monthly" ? styles.toggleBtnActive : ""}`}
-              onClick={() => setTasteTimeframe("monthly")}
-              id="taste-monthly-btn"
-            >
-              Monthly (Semester Trend)
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.chartCanvasArea}>
-          {isMounted ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={tasteData} margin={{ top: 20, right: 25, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis
-                  dataKey="label"
-                  stroke="#94a3b8"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={{ stroke: "#e2e8f0" }}
-                />
-                <YAxis
-                  stroke="#94a3b8"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={{ stroke: "#e2e8f0" }}
-                  domain={[3.5, 5.0]}
-                  ticks={[3.5, 4.0, 4.5, 5.0]}
-                />
-                <Tooltip content={<CustomChartTooltip unit="★" />} />
-                <Legend
-                  verticalAlign="top"
-                  align="right"
-                  height={36}
-                  iconType="circle"
-                  formatter={(value) => <span style={{ color: "#334155", fontSize: "0.82rem", fontWeight: 600 }}>{value}</span>}
-                />
-                {/* Target Benchmark Line at 4.5 */}
-                <ReferenceLine
-                  y={4.5}
-                  stroke="#059669"
-                  strokeDasharray="4 4"
-                  label={{
-                    value: "Target: 4.5 ★",
-                    fill: "#059669",
-                    position: "insideTopLeft",
-                    fontSize: 11,
-                    fontWeight: 700,
-                  }}
-                />
-                {/* Food Taste Rating Line - High Contrast Emerald Green */}
-                <Line
-                  type="linear"
-                  dataKey="tasteRating"
-                  name="Taste Score (out of 5.0)"
-                  stroke="#10b981"
-                  strokeWidth={3.8}
-                  dot={{ r: 5, fill: "#10b981", strokeWidth: 2, stroke: "#ffffff" }}
-                  activeDot={{ r: 7, fill: "#047857", strokeWidth: 3, stroke: "#ffffff" }}
-                />
-              </LineChart>
+                )}
+              </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ height: 300, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>
-              Loading taste improvement trend...
+            <div
+              style={{
+                height: 295,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#94a3b8",
+                fontSize: "0.85rem",
+              }}
+            >
+              Loading meal attendance trends...
             </div>
           )}
         </div>
+      </div>
 
-        <div className={styles.legendBar}>
-          <div className={styles.legendItem}>
-            <span className={styles.legendIndicator} style={{ backgroundColor: "#10b981" }} />
-            <span>Taste Score Growth: <strong>+0.70 Stars</strong> (from 4.10 to 4.80 ★ this month)</span>
+      {/* ============================================================
+          RIGHT COLUMN: Daily Food Wastage Donut Card (Side by Side)
+          ============================================================ */}
+      <div className={styles.rightColumn}>
+        <div className={styles.wastageCard}>
+          {/* Card Title */}
+          <h2 className={styles.cardTitle}>Daily Food Wastage</h2>
+
+          {/* Donut Chart with Centered Total Weight */}
+          <div className={styles.chartContainer}>
+            <svg
+              viewBox="0 0 210 210"
+              className={styles.donutSvg}
+              role="img"
+              aria-label="Daily food wastage donut chart showing 83kg across Dinner, Lunch, and Breakfast"
+            >
+              {/* Dinner Slice: Orange (50%) on Right */}
+              <path
+                d={orangePath}
+                fill="#f36f21"
+                stroke="#ffffff"
+                strokeWidth="2.5"
+                className={styles.donutSegment}
+                onMouseEnter={() => setHoveredSlice("Dinner")}
+                onMouseLeave={() => setHoveredSlice(null)}
+                style={{
+                  opacity: hoveredSlice && hoveredSlice !== "Dinner" ? 0.6 : 1,
+                }}
+              >
+                <title>Dinner: 41.5 kg (50%)</title>
+              </path>
+
+              {/* Lunch Slice: White/Cream (30%) on Bottom-Left */}
+              <path
+                d={whitePath}
+                fill="#fbf6ee"
+                stroke="#e2e8f0"
+                strokeWidth="2.5"
+                className={styles.donutSegment}
+                onMouseEnter={() => setHoveredSlice("Lunch")}
+                onMouseLeave={() => setHoveredSlice(null)}
+                style={{
+                  opacity: hoveredSlice && hoveredSlice !== "Lunch" ? 0.6 : 1,
+                }}
+              >
+                <title>Lunch: 24.9 kg (30%)</title>
+              </path>
+
+              {/* Breakfast Slice: Blue (20%) on Top-Left */}
+              <path
+                d={bluePath}
+                fill="#2563eb"
+                stroke="#ffffff"
+                strokeWidth="2.5"
+                className={styles.donutSegment}
+                onMouseEnter={() => setHoveredSlice("Breakfast")}
+                onMouseLeave={() => setHoveredSlice(null)}
+                style={{
+                  opacity: hoveredSlice && hoveredSlice !== "Breakfast" ? 0.6 : 1,
+                }}
+              >
+                <title>Breakfast: 16.6 kg (20%)</title>
+              </path>
+            </svg>
+
+            {/* Centered Total Stat ("Daily Wastage" removed above 83) */}
+            <div className={styles.chartCenterOverlay}>
+              <span className={styles.centerNumber}>{counts.waste}</span>
+              <span className={styles.centerUnit}>kg</span>
+            </div>
           </div>
-          <div className={styles.legendItem}>
-            <span className={styles.legendIndicator} style={{ backgroundColor: "#059669" }} />
-            <span>Exceeds Target Benchmark of 4.5 ★ by +0.30 stars</span>
+
+          {/* Subtitle / Context Note */}
+          <p className={styles.subtitleNote}>
+            Daily mess food waste reduced by 14% today!
+          </p>
+
+          {/* More Information Button */}
+          <button
+            type="button"
+            className={styles.moreInfoBtn}
+            onClick={() => setShowInfoModal(true)}
+            id="more-info-wastage-btn"
+          >
+            More Information
+          </button>
+
+          {/* Legend List at the Bottom - Reordered: (Breakfast, Lunch, Snack, Dinner) */}
+          <div className={styles.legendList}>
+            {DAILY_WASTE_DATA.map((item) => (
+              <div
+                key={item.name}
+                className={styles.legendItem}
+                onMouseEnter={() => item.percentage > 0 && setHoveredSlice(item.name)}
+                onMouseLeave={() => setHoveredSlice(null)}
+              >
+                <div className={styles.legendLeft}>
+                  <span
+                    className={styles.legendDot}
+                    style={{
+                      backgroundColor: item.dotColor,
+                      border: item.dotBorder || "none",
+                    }}
+                  />
+                  <span className={styles.legendLabel}>{item.name}</span>
+                </div>
+                <div className={styles.legendRight}>
+                  <span className={styles.legendKg}>{item.weightKg} kg</span>
+                  <span className={styles.legendPercent}>{item.percentage}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Zero Food Waste Awareness & Motivation Banner */}
+          <div className={styles.wasteAwarenessCard}>
+            <div className={styles.awarenessHeader}>
+              <span className={styles.awarenessBadge}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                Every Grain Matters
+              </span>
+              <h4 className={styles.awarenessTitle}>Don&apos;t Waste Food</h4>
+            </div>
+
+            <p className={styles.awarenessQuote}>
+              &ldquo;The food you waste today can fulfill the hunger of an empty stomach. Thousands go to bed without a single meal.&rdquo;
+            </p>
+
+            <div className={styles.awarenessTipBox}>
+              <span className={styles.awarenessTipIcon} aria-hidden="true">🍲</span>
+              <div className={styles.awarenessTipText}>
+                <strong>Take Little &bull; Refill Frequently:</strong> Put small portions on your plate first. Mess meals are unlimited &mdash; you can always go back and refill as many times as you want!
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Detail Modal Dialog when clicking "More Information" */}
+      {showInfoModal && (
+        <div className={styles.modalBackdrop} onClick={() => setShowInfoModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Daily Food Wastage Breakdown</h3>
+              <button
+                type="button"
+                className={styles.modalCloseBtn}
+                onClick={() => setShowInfoModal(false)}
+                aria-label="Close dialog"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={styles.modalDetailRows}>
+              {DAILY_WASTE_DATA.map((item) => (
+                <div key={item.name} className={styles.modalDetailItem}>
+                  <div className={styles.modalDetailLeft}>
+                    <span
+                      className={styles.legendDot}
+                      style={{
+                        backgroundColor: item.dotColor,
+                        border: item.dotBorder || "none",
+                      }}
+                    />
+                    <div>
+                      <div className={styles.modalDetailTitle}>{item.name}</div>
+                      <div className={styles.modalDetailTiming}>{item.timing}</div>
+                    </div>
+                  </div>
+                  <div className={styles.modalDetailRight}>
+                    <div className={styles.modalDetailWeight}>{item.weightKg} kg</div>
+                    <div className={styles.modalDetailPercent}>
+                      {item.percentage > 0 ? `${item.percentage}% of daily total` : "Zero waste logged"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.modalFooterNote}>
+              📍 <strong>Mess Location:</strong> Boys Hostel 1 • Central Kitchen Hall 07
+              <br />
+              Total recorded waste today: <strong>{TOTAL_WASTE_KG} kg</strong> (Reduced from 96.5 kg daily baseline).
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
