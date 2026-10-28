@@ -89,82 +89,17 @@ export const NOTIFICATION_TYPES_SPEC: NotificationTypeMeta[] = [
   },
 ];
 
-export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "notif-1",
-    category: "menu",
-    title: "Today's lunch menu is published!",
-    body: "Rice, dal, roti and paneer curry. Check the full menu before lunch.",
-    time: "10 mins ago",
-    isRead: false,
-  },
-  {
-    id: "notif-2",
-    category: "timing",
-    title: "Lunch starts in 15 minutes",
-    body: "Lunch service is scheduled from 12:00 PM to 2:00 PM.",
-    time: "25 mins ago",
-    isRead: false,
-  },
-  {
-    id: "notif-3",
-    category: "attendance",
-    title: "Lunch attendance recorded",
-    body: "Your attendance for today's lunch has been recorded successfully.",
-    time: "Today, 12:42 PM",
-    isRead: false,
-  },
-  {
-    id: "notif-4",
-    category: "announcement",
-    title: "Dinner timing updated",
-    body: "Today's dinner service will begin at 7:30 PM instead of 7:00 PM.",
-    time: "2 hours ago",
-    isRead: true,
-  },
-  {
-    id: "notif-5",
-    category: "feedback",
-    title: "Complaint status updated",
-    body: "Your complaint about lunch quality has been reviewed by the mess manager.",
-    time: "Yesterday, 4:15 PM",
-    isRead: true,
-  },
-  {
-    id: "notif-6",
-    category: "waste",
-    title: "Help us reduce food waste",
-    body: "Today's menu is available. Check the dishes planned for each meal and share your feedback afterward.",
-    time: "Yesterday, 9:00 AM",
-    isRead: true,
-  },
-  {
-    id: "notif-7",
-    category: "menu",
-    title: "Sunday Special Dinner Menu Released",
-    body: "Chef special Paneer Butter Masala, Veg Dum Biryani, and Hot Gulab Jamun scheduled for Sunday 7:30 PM at BH-4 Central Mess.",
-    time: "2 days ago",
-    isRead: true,
-  },
-  {
-    id: "notif-8",
-    category: "attendance",
-    title: "Breakfast attendance recorded",
-    body: "Your attendance for today's breakfast at Counter 2 has been recorded successfully.",
-    time: "2 days ago",
-    isRead: true,
-  },
-];
+export const INITIAL_NOTIFICATIONS: NotificationItem[] = [];
 
-export const NOTIFICATIONS_STORAGE_KEY = "lpu_student_notifications";
+export const NOTIFICATIONS_STORAGE_KEY = "lpu_student_notifications_v3";
 
 export function getStoredNotifications(): NotificationItem[] {
   if (typeof window === "undefined") return INITIAL_NOTIFICATIONS;
   try {
     const raw = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed;
       }
     }

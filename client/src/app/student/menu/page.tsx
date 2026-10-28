@@ -158,6 +158,9 @@ export default function StudentMenuPage() {
     const chosenDate = new Date(calendarViewYear, calendarViewMonth, dayNumber);
     const chosenKey = formatDateKey(chosenDate);
     setSelectedDateKey(chosenKey);
+    try {
+      localStorage.setItem("menu_active_selected_date", chosenKey);
+    } catch {}
 
     // Calculate diff in days relative to todayAnchor
     const diffDays = Math.round(
@@ -182,9 +185,13 @@ export default function StudentMenuPage() {
     setDayOffset(0);
     const now = new Date();
     const clientToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const key = formatDateKey(clientToday);
     setTodayAnchor(clientToday);
     setTodayDate(clientToday);
-    setSelectedDateKey(formatDateKey(clientToday));
+    setSelectedDateKey(key);
+    try {
+      localStorage.setItem("menu_active_selected_date", key);
+    } catch {}
     setCurrentMinutes(now.getHours() * 60 + now.getMinutes());
   };
 
@@ -326,7 +333,12 @@ export default function StudentMenuPage() {
                   key={day.dateKey}
                   type="button"
                   className={`${styles.dayPill} ${isSelected ? styles.dayPillActive : ""}`}
-                  onClick={() => setSelectedDateKey(day.dateKey)}
+                  onClick={() => {
+                    setSelectedDateKey(day.dateKey);
+                    try {
+                      localStorage.setItem("menu_active_selected_date", day.dateKey);
+                    } catch {}
+                  }}
                   aria-pressed={isSelected}
                 >
                   <span className={styles.dayPillName}>{day.dayShort}</span>

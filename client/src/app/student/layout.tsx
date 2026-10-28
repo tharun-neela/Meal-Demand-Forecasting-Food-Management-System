@@ -39,7 +39,7 @@ const NAV_ITEMS: NavItem[] = [
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
         <path d="M7 2v20" />
-        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+        <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
       </svg>
     ),
   },
@@ -766,18 +766,24 @@ export default function StudentLayout({
                       )}
                     </div>
                     <div className={styles.notificationList}>
-                      {dropdownNotifications.map((notif) => (
-                        <Link
-                          key={notif.id}
-                          href="/student/notifications"
-                          onClick={() => handleGoToNotifications(notif.id)}
-                          className={styles.notificationItem}
-                        >
-                          <div className={styles.notificationItemTitle}>{notif.title}</div>
-                          <div className={styles.notificationItemBody}>{notif.body}</div>
-                          <div className={styles.notificationItemTime}>{notif.time}</div>
-                        </Link>
-                      ))}
+                      {dropdownNotifications.length === 0 ? (
+                        <div style={{ padding: "2rem 1rem", textAlign: "center", color: "#64748b", fontSize: "0.88rem" }}>
+                          <p style={{ margin: 0, fontWeight: 500 }}>No notifications</p>
+                        </div>
+                      ) : (
+                        dropdownNotifications.map((notif) => (
+                          <Link
+                            key={notif.id}
+                            href="/student/notifications"
+                            onClick={() => handleGoToNotifications(notif.id)}
+                            className={styles.notificationItem}
+                          >
+                            <div className={styles.notificationItemTitle}>{notif.title}</div>
+                            <div className={styles.notificationItemBody}>{notif.body}</div>
+                            <div className={styles.notificationItemTime}>{notif.time}</div>
+                          </Link>
+                        ))
+                      )}
                     </div>
                     <div className={styles.dropdownFooter}>
                       <Link

@@ -177,102 +177,6 @@ export default function MealAnalyticsPage() {
   return (
     <div className={styles.analyticsContainer}>
 
-      {/* Part 1: Top KPI Summary Metrics Bar */}
-      <div className={styles.kpiGrid}>
-        {/* KPI 1 */}
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiTopRow}>
-            <div className={styles.kpiIconWrapper} style={{ backgroundColor: "#fff7ed", color: "#ea580c" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-                <line x1="6" y1="1" x2="6" y2="4" />
-                <line x1="10" y1="1" x2="10" y2="4" />
-                <line x1="14" y1="1" x2="14" y2="4" />
-              </svg>
-            </div>
-            <span className={styles.kpiBadgeGreen}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
-              +14.2% Rising
-            </span>
-          </div>
-          <div>
-            <div className={styles.kpiValue}>86 Meals</div>
-            <div className={styles.kpiLabel}>Total Meals Consumed</div>
-          </div>
-          <div className={styles.kpiSubtext}>+11 more check-ins than last month</div>
-        </div>
-
-        {/* KPI 2 */}
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiTopRow}>
-            <div className={styles.kpiIconWrapper} style={{ backgroundColor: "#eff6ff", color: "#2563eb" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
-            <span className={styles.kpiBadgeBlue}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
-              94.5% Active
-            </span>
-          </div>
-          <div>
-            <div className={styles.kpiValue}>94.5%</div>
-            <div className={styles.kpiLabel}>Meal Attendance Rate</div>
-          </div>
-          <div className={styles.kpiSubtext}>Highest consistency in Boys Hostel 1</div>
-        </div>
-
-        {/* KPI 3 */}
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiTopRow}>
-            <div className={styles.kpiIconWrapper} style={{ backgroundColor: "#ecfdf5", color: "#059669" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-            </div>
-            <span className={styles.kpiBadgeGreen}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
-              +0.70 Stars
-            </span>
-          </div>
-          <div>
-            <div className={styles.kpiValue}>4.8 / 5.0</div>
-            <div className={styles.kpiLabel}>Food Taste Rating</div>
-          </div>
-          <div className={styles.kpiSubtext}>Up from 4.10 following menu upgrades</div>
-        </div>
-
-        {/* KPI 4 */}
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiTopRow}>
-            <div className={styles.kpiIconWrapper} style={{ backgroundColor: "#fef2f2", color: "#dc2626" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            </div>
-            <span className={styles.kpiBadgeGreen} style={{ color: "#059669" }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-              -18.4% Drop
-            </span>
-          </div>
-          <div>
-            <div className={styles.kpiValue}>38.4 kg</div>
-            <div className={styles.kpiLabel}>Daily Mess Waste</div>
-          </div>
-          <div className={styles.kpiSubtext}>Reduced from 47.1 kg avg. daily baseline</div>
-        </div>
-      </div>
 
       {/* Part 2: Weekly / Monthly Meal Access Trend (Line Chart - Req 3) */}
       <div className={styles.chartCard}>
@@ -345,7 +249,7 @@ export default function MealAnalyticsPage() {
                 />
                 {/* Secondary Reference / Comparison Line */}
                 <Line
-                  type="monotone"
+                  type="linear"
                   dataKey="prevAccessCount"
                   name="Previous Period"
                   stroke="#94a3b8"
@@ -355,7 +259,7 @@ export default function MealAnalyticsPage() {
                 />
                 {/* Primary High-Contrast Line */}
                 <Line
-                  type="monotone"
+                  type="linear"
                   dataKey="accessCount"
                   name="Current Access (Rising)"
                   stroke="#f36f21"
@@ -658,7 +562,7 @@ export default function MealAnalyticsPage() {
                 />
                 {/* Food Taste Rating Line - High Contrast Emerald Green */}
                 <Line
-                  type="monotone"
+                  type="linear"
                   dataKey="tasteRating"
                   name="Taste Score (out of 5.0)"
                   stroke="#10b981"

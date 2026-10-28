@@ -19,10 +19,9 @@ export function NotificationCategoryIcon({ category }: { category: NotificationC
     case "menu":
       return (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 2v20" />
-          <path d="M21 7V2a5 5 0 0 0-5 5v3a2 2 0 0 0 2 2h3" />
           <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
           <path d="M7 2v20" />
+          <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
         </svg>
       );
     case "timing":
@@ -96,12 +95,6 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const markAllAsRead = () => {
-    const next = notifications.map((n) => ({ ...n, isRead: true }));
-    setNotifications(next);
-    saveStoredNotifications(next);
-  };
-
   const markAsRead = (id: string) => {
     const next = notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
     setNotifications(next);
@@ -121,8 +114,8 @@ export default function NotificationsPage() {
 
   return (
     <div className={styles.notificationsWrapper}>
-      {/* Top Controls: Filter Tabs & Mark All As Read Action */}
-      <div className={styles.topControlRow}>
+      {/* Full-width Category Tabs spanning 100% of the page length */}
+      <div className={styles.filterTabsRow}>
         <div className={styles.filterTabs}>
           <button
             type="button"
@@ -171,7 +164,7 @@ export default function NotificationsPage() {
             className={`${styles.filterTab} ${activeFilter === "feedback" ? styles.filterTabActive : ""}`}
             onClick={() => setActiveFilter("feedback")}
           >
-            Feedback & Complaints
+            Feedback &amp; Complaints
           </button>
           <button
             type="button"
@@ -181,20 +174,6 @@ export default function NotificationsPage() {
             Food Waste
           </button>
         </div>
-
-        {unreadCount > 0 && (
-          <button
-            type="button"
-            className={styles.markReadBtn}
-            onClick={markAllAsRead}
-            id="mark-all-read-btn"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            <span>Mark all as read</span>
-          </button>
-        )}
       </div>
 
       {/* Notifications Feed */}

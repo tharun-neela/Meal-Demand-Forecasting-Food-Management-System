@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useId } from "react";
+import { useState, useId, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./page.module.css";
@@ -74,6 +74,20 @@ export default function LoginPage() {
   const userIdInputId = useId();
   const passwordInputId = useId();
 
+  // Restore remembered Registration No. (User ID) on mount — password is never remembered
+  useEffect(() => {
+    try {
+      const savedRegNo = localStorage.getItem("lpu_remembered_reg_no");
+      const isRememberChecked = localStorage.getItem("lpu_remember_me_checked") === "true";
+      if (isRememberChecked && savedRegNo) {
+        setUserId(savedRegNo);
+        setRememberMe(true);
+      }
+    } catch {
+      // ignore localStorage errors in restricted environments
+    }
+  }, []);
+
   // Role selection change helper
   const handleRoleChange = (newRole: UserRole) => {
     setSelectedRole(newRole);
@@ -123,10 +137,15 @@ export default function LoginPage() {
       // Store JWT token for subsequent RBAC requests and Next.js middleware protection
       if (data.token) {
         if (rememberMe) {
+          // Remember ONLY the registration number (User ID) — NEVER store password
+          localStorage.setItem("lpu_remembered_reg_no", userId.trim());
+          localStorage.setItem("lpu_remember_me_checked", "true");
           localStorage.setItem("lpu_mess_jwt", data.token);
           localStorage.setItem("lpu_mess_remember", "true");
           document.cookie = `lpu_mess_jwt=${data.token}; path=/; max-age=604800; SameSite=Lax`;
         } else {
+          localStorage.removeItem("lpu_remembered_reg_no");
+          localStorage.removeItem("lpu_remember_me_checked");
           sessionStorage.setItem("lpu_mess_jwt", data.token);
           localStorage.removeItem("lpu_mess_jwt");
           localStorage.removeItem("lpu_mess_remember");
@@ -362,7 +381,18 @@ export default function LoginPage() {
                   type="checkbox"
                   className={styles.checkbox}
                   checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setRememberMe(checked);
+                    if (!checked) {
+                      try {
+                        localStorage.removeItem("lpu_remembered_reg_no");
+                        localStorage.removeItem("lpu_remember_me_checked");
+                      } catch {
+                        // ignore
+                      }
+                    }
+                  }}
                 />
                 <span>Remember me</span>
               </label>

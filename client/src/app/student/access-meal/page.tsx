@@ -18,33 +18,98 @@ interface AttendanceRecord {
 const STORAGE_KEY = "student_meal_attendance_records";
 const AUTHORIZED_QR_CODE = "BH1M07";
 
-// Helper to determine ongoing meal based on current local time
-function getCurrentMealInfo(): { name: string; timing: string; id: "breakfast" | "lunch" | "snacks" | "dinner" } {
+interface MealServiceStatus {
+  isOpen: boolean;
+  activeMeal: {
+    id: "breakfast" | "lunch" | "snacks" | "dinner";
+    name: string;
+    timing: string;
+  } | null;
+  nextMeal?: {
+    id: "breakfast" | "lunch" | "snacks" | "dinner";
+    name: string;
+    timing: string;
+  } | null;
+}
+
+// Helper to determine whether mess is currently open or closed based on real time
+function getCurrentMealStatus(): MealServiceStatus {
   const now = new Date();
   const mins = now.getHours() * 60 + now.getMinutes();
+  const isSunday = now.getDay() === 0;
 
-  // Breakfast: 07:30 (450) - 09:30 (570)
-  if (mins >= 420 && mins < 630) {
-    return { name: "Breakfast", timing: "07:30 AM – 09:30 AM", id: "breakfast" };
+  // Working days (Mon - Sat):
+  // Breakfast: 07:30 AM (450) – 09:30 AM (570)
+  // Lunch:     11:30 AM (690) – 03:00 PM (900)
+  // Snacks:    05:00 PM (1020) – 06:30 PM (1110)
+  // Dinner:    07:30 PM (1170) – 09:30 PM (1290)
+  //
+  // Sunday:
+  // Breakfast: 08:00 AM (480) – 10:00 AM (600)
+  // Lunch:     12:30 PM (750) – 03:00 PM (900)
+  // Snacks:    05:00 PM (1020) – 06:30 PM (1110)
+  // Dinner:    07:30 PM (1170) – 09:30 PM (1290)
+
+  const bStart = isSunday ? 480 : 450;
+  const bEnd = isSunday ? 600 : 570;
+  const bTiming = isSunday ? "08:00 AM – 10:00 AM" : "07:30 AM – 09:30 AM";
+
+  const lStart = isSunday ? 750 : 690;
+  const lEnd = 900;
+  const lTiming = isSunday ? "12:30 PM – 03:00 PM" : "11:30 AM – 03:00 PM";
+
+  const sStart = 1020;
+  const sEnd = 1110;
+  const sTiming = "05:00 PM – 06:30 PM";
+
+  const dStart = 1170;
+  const dEnd = 1290;
+  const dTiming = "07:30 PM – 09:30 PM";
+
+  if (mins >= bStart && mins <= bEnd) {
+    return {
+      isOpen: true,
+      activeMeal: { id: "breakfast", name: "Breakfast", timing: bTiming },
+    };
   }
-  // Lunch: 11:30 (690) - 15:00 (900)
-  if (mins >= 660 && mins < 930) {
-    return { name: "Lunch", timing: "11:30 AM – 03:00 PM", id: "lunch" };
+  if (mins >= lStart && mins <= lEnd) {
+    return {
+      isOpen: true,
+      activeMeal: { id: "lunch", name: "Lunch", timing: lTiming },
+    };
   }
-  // Snacks: 17:00 (1020) - 18:30 (1110)
-  if (mins >= 990 && mins < 1140) {
-    return { name: "Evening Snacks", timing: "05:00 PM – 06:30 PM", id: "snacks" };
+  if (mins >= sStart && mins <= sEnd) {
+    return {
+      isOpen: true,
+      activeMeal: { id: "snacks", name: "Evening Snacks", timing: sTiming },
+    };
   }
-  // Dinner: 19:30 (1170) - 21:30 (1290)
-  if (mins >= 1140 && mins < 1350) {
-    return { name: "Dinner", timing: "07:30 PM – 09:30 PM", id: "dinner" };
+  if (mins >= dStart && mins <= dEnd) {
+    return {
+      isOpen: true,
+      activeMeal: { id: "dinner", name: "Dinner", timing: dTiming },
+    };
   }
 
-  // Off-hours fallback
-  if (mins < 420) {
-    return { name: "Breakfast", timing: "07:30 AM – 09:30 AM (Upcoming)", id: "breakfast" };
+  // Outside all active service hours -> Mess is Closed
+  let nextMeal: MealServiceStatus["nextMeal"] = null;
+  if (mins < bStart) {
+    nextMeal = { id: "breakfast", name: "Breakfast", timing: bTiming };
+  } else if (mins < lStart) {
+    nextMeal = { id: "lunch", name: "Lunch", timing: lTiming };
+  } else if (mins < sStart) {
+    nextMeal = { id: "snacks", name: "Evening Snacks", timing: sTiming };
+  } else if (mins < dStart) {
+    nextMeal = { id: "dinner", name: "Dinner", timing: dTiming };
+  } else {
+    nextMeal = { id: "breakfast", name: "Breakfast", timing: "07:30 AM – 09:30 AM" };
   }
-  return { name: "Dinner", timing: "07:30 PM – 09:30 PM", id: "dinner" };
+
+  return {
+    isOpen: false,
+    activeMeal: null,
+    nextMeal,
+  };
 }
 
 // Payment-app style multi-tone chime (like Google Pay / Paytm sound)
@@ -106,12 +171,6 @@ function playRejectionTone() {
   }
 }
 
-const DEFAULT_MEAL_INFO = {
-  name: "Dinner",
-  timing: "07:30 PM – 09:30 PM",
-  id: "dinner",
-};
-
 export default function AccessMealPage() {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isRequestingPermission, setIsRequestingPermission] = useState<boolean>(false);
@@ -122,7 +181,10 @@ export default function AccessMealPage() {
   const [scannedResult, setScannedResult] = useState<AttendanceRecord | null>(null);
   const [popupCountdown, setPopupCountdown] = useState<number>(20);
   const [recentRecords, setRecentRecords] = useState<AttendanceRecord[]>([]);
-  const [currentMeal, setCurrentMeal] = useState<{ name: string; timing: string; id: string }>(DEFAULT_MEAL_INFO);
+  const [mealStatus, setMealStatus] = useState<MealServiceStatus>({
+    isOpen: false,
+    activeMeal: null,
+  });
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -137,30 +199,24 @@ export default function AccessMealPage() {
 
   // Initialize ongoing meal and load attendance history from localStorage
   useEffect(() => {
-    setCurrentMeal(getCurrentMealInfo());
+    const updateStatus = () => {
+      setMealStatus(getCurrentMealStatus());
+    };
+    updateStatus();
+    const interval = setInterval(updateStatus, 15000);
 
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setRecentRecords(JSON.parse(stored));
       } else {
-        const initialSamples: AttendanceRecord[] = [
-          {
-            id: "att-101",
-            mealName: "Dinner",
-            messHall: "Boys Hostel 1 • Mess Hall 07",
-            timestamp: "Today, 08:15 PM",
-            dateKey: new Date().toISOString().split("T")[0],
-            qrPayload: "BH1M07",
-            verified: true,
-          },
-        ];
-        setRecentRecords(initialSamples);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialSamples));
+        setRecentRecords([]);
       }
     } catch {
       // Ignore localStorage errors
     }
+
+    return () => clearInterval(interval);
   }, []);
 
   // Dismiss modal and reset all scanning locks cleanly
@@ -288,11 +344,12 @@ export default function AccessMealPage() {
 
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const current = getCurrentMealInfo();
+      const status = getCurrentMealStatus();
+      const mealName = status.activeMeal?.name || status.nextMeal?.name || "Dinner";
 
       const newRecord: AttendanceRecord = {
         id: `att-${Date.now()}`,
-        mealName: current.name,
+        mealName: mealName,
         messHall: "Boys Hostel 1 • Mess Hall 07",
         timestamp: `Today, ${timeStr}`,
         dateKey: now.toISOString().split("T")[0],
@@ -511,12 +568,19 @@ export default function AccessMealPage() {
     <div className={styles.pageContainer}>
       {/* Active Service Context Pill */}
       <div className={styles.headerContext}>
-        <div className={styles.mealServicePill}>
-          <span className={styles.livePulseDot} />
-          <span>Active Service: {currentMeal.name}</span>
-          <span style={{ opacity: 0.6 }}>&bull;</span>
-          <span>{currentMeal.timing}</span>
-        </div>
+        {mealStatus.isOpen && mealStatus.activeMeal ? (
+          <div className={styles.mealServicePill}>
+            <span className={styles.livePulseDot} />
+            <span>Active Service: {mealStatus.activeMeal.name}</span>
+            <span style={{ opacity: 0.6 }}>&bull;</span>
+            <span>{mealStatus.activeMeal.timing}</span>
+          </div>
+        ) : (
+          <div className={styles.mealClosedPill}>
+            <span className={styles.closedDot} />
+            <span>Mess is Closed</span>
+          </div>
+        )}
       </div>
 
       {/* Main Scanner Card (Faithfully matching sample photo) */}
