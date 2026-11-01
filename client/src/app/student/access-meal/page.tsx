@@ -363,6 +363,9 @@ export default function AccessMealPage() {
         const updated = [newRecord, ...prev.filter((r) => r.id !== newRecord.id)].slice(0, 5);
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("mealAttendanceUpdated"));
+          }
         } catch {
           // ignore
         }

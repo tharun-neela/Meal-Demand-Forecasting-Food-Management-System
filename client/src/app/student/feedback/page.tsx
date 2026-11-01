@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./feedback.module.css";
 import { getMenuForDate, CalculatedDateInfo } from "../menu/menuData";
 
@@ -10,6 +10,13 @@ interface DishItem {
   id: string;
   name: string;
   category: string;
+}
+
+interface UploadedPhoto {
+  id: string;
+  name: string;
+  size: string;
+  dataUrl: string;
 }
 
 const QUICK_TAGS = [
@@ -25,11 +32,8 @@ const QUICK_TAGS = [
 
 const FEEDBACK_STORAGE_KEY = "lpu_student_meal_feedbacks";
 
-// Static fallback anchor date for safe SSR hydration
-const STATIC_ANCHOR = new Date(2026, 9, 23);
-
 export default function FeedbackPage() {
-  const [todayDate, setTodayDate] = useState<Date>(STATIC_ANCHOR);
+  const [todayDate, setTodayDate] = useState<Date | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<MealType>("lunch");
 
   // Mandatory overall meal rating (starts at 0 to enforce explicit rating)
@@ -46,10 +50,16 @@ export default function FeedbackPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comments, setComments] = useState<string>("");
 
+  // Food picture upload state & file input reference
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
   // Validation & modal feedback
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [lastSubmittedMealName, setLastSubmittedMealName] = useState<string>("");
+  const [submittedPhotoCount, setSubmittedPhotoCount] = useState<number>(0);
 
   // Strictly bind to TODAY'S date on mount (feedback is strictly for current day)
   useEffect(() => {
@@ -59,7 +69,8 @@ export default function FeedbackPage() {
 
   // Today's menu from the approved schedule
   const todayDayInfo: CalculatedDateInfo = useMemo(() => {
-    return getMenuForDate(todayDate, todayDate);
+    const d = todayDate || new Date(2026, 0, 1);
+    return getMenuForDate(d, d);
   }, [todayDate]);
 
   const { dayMenu, dayOfWeek } = todayDayInfo;
@@ -108,6 +119,92 @@ export default function FeedbackPage() {
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
     setValidationError(null);
+  };
+
+  // Process uploaded image files and generate previews
+  const handleProcessFiles = (fileList: FileList | File[]) => {
+    const files = Array.from(fileList);
+    const validImageFiles = files.filter((f) => f.type.startsWith("image/"));
+
+    if (validImageFiles.length === 0) {
+      setValidationError("Please select image files only (PNG, JPG, JPEG, WebP, GIF).");
+      return;
+    }
+
+    const currentCount = uploadedPhotos.length;
+    const remainingSlots = 5 - currentCount;
+    if (remainingSlots <= 0) {
+      setValidationError("Maximum of 5 food photos allowed per feedback submission.");
+      return;
+    }
+
+    const allowedFiles = validImageFiles.slice(0, remainingSlots);
+
+    allowedFiles.forEach((file) => {
+      // 10MB limit per image
+      if (file.size > 10 * 1024 * 1024) {
+        setValidationError(`"${file.name}" exceeds the 10MB limit.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        if (!dataUrl) return;
+
+        const sizeInKB = Math.round(file.size / 1024);
+        const sizeFormatted =
+          sizeInKB >= 1024
+            ? `${(sizeInKB / 1024).toFixed(1)} MB`
+            : `${sizeInKB} KB`;
+
+        setUploadedPhotos((prev) => {
+          if (prev.some((p) => p.name === file.name && p.size === sizeFormatted)) {
+            return prev;
+          }
+          return [
+            ...prev,
+            {
+              id: `photo-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+              name: file.name,
+              size: sizeFormatted,
+              dataUrl,
+            },
+          ];
+        });
+        setValidationError(null);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleProcessFiles(e.target.files);
+      e.target.value = "";
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleProcessFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleRemovePhoto = (photoId: string) => {
+    setUploadedPhotos((prev) => prev.filter((p) => p.id !== photoId));
   };
 
   // Submit with mandatory star rating validation
@@ -159,6 +256,12 @@ export default function FeedbackPage() {
       dishComments: { ...dishComments },
       selectedTags: [...selectedTags],
       comments: comments.trim(),
+      photos: uploadedPhotos.map((p) => ({
+        id: p.id,
+        name: p.name,
+        size: p.size,
+        dataUrl: p.dataUrl,
+      })),
       submittedAt: `Today, ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
     };
 
@@ -171,10 +274,12 @@ export default function FeedbackPage() {
     }
 
     setLastSubmittedMealName(mealName);
+    setSubmittedPhotoCount(uploadedPhotos.length);
     setShowSuccessModal(true);
 
-    // Reset optional comments while keeping state clean
+    // Reset optional comments and photos while keeping state clean
     setComments("");
+    setUploadedPhotos([]);
   };
 
 
@@ -250,6 +355,22 @@ export default function FeedbackPage() {
 
   return (
     <div className={styles.feedbackContainer}>
+      {/* Honest Review Notice Banner */}
+      <div className={styles.honestReviewBanner}>
+        <div className={styles.honestReviewIconWrapper}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+        </div>
+        <div className={styles.honestReviewTextGroup}>
+          <h2 className={styles.honestReviewTitle}>Daily Mess Feedback</h2>
+          <p className={styles.honestReviewDesc}>
+            Give your honest review — this will help us to provide you quality, hygienic, and tasty food.
+          </p>
+        </div>
+      </div>
+
       {/* Validation Warning Alert if mandatory stars are missing */}
       {validationError && (
         <div className={styles.validationWarningBanner} role="alert">
@@ -460,6 +581,143 @@ export default function FeedbackPage() {
           </div>
         </div>
 
+        {/* Step 5: Upload Pictures of Food (OPTIONAL) */}
+        <div className={styles.photoUploadBlock}>
+          <div className={styles.sectionLabel}>
+            <span>4. Upload Pictures of Food</span>
+            <span className={styles.optionalBadge}>Optional</span>
+          </div>
+          <p className={styles.photoUploadHint}>
+            Share pictures of today&apos;s food, portions, or presentation to help mess supervisors monitor quality and hygiene.
+          </p>
+
+          {/* Hidden File Input triggering native file explorer */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className={styles.hiddenFileInput}
+            onChange={handleFileChange}
+            id="food-photo-file-input"
+            aria-label="Upload food photos"
+          />
+
+          {/* Drag & Drop or Click-to-Upload Dropzone */}
+          {uploadedPhotos.length === 0 ? (
+            <div
+              className={`${styles.uploadDropzone} ${isDragging ? styles.uploadDropzoneActive : ""}`}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              aria-label="Click or drag photos here to upload"
+            >
+              <div className={styles.uploadIconCircle}>
+                <svg
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                  <circle cx="9" cy="9" r="2" />
+                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                </svg>
+              </div>
+              <div className={styles.uploadTextGroup}>
+                <span className={styles.uploadMainText}>
+                  <strong>Click to upload photos</strong> or drag and drop
+                </span>
+                <span className={styles.uploadSubText}>
+                  PNG, JPG, JPEG, WebP (up to 5 photos, max 10MB each)
+                </span>
+              </div>
+              <button
+                type="button"
+                className={styles.browseFilesBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span>Browse Files</span>
+              </button>
+            </div>
+          ) : (
+            <div className={styles.uploadedPhotosContainer}>
+              <div className={styles.uploadedPhotosHeader}>
+                <span className={styles.photosCountBadge}>
+                  📷 {uploadedPhotos.length} {uploadedPhotos.length === 1 ? "Photo" : "Photos"} Selected
+                </span>
+                {uploadedPhotos.length < 5 && (
+                  <button
+                    type="button"
+                    className={styles.addMorePhotosBtn}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>Add More ({5 - uploadedPhotos.length} remaining)</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Photo Previews Grid with Delete Buttons */}
+              <div className={styles.photoPreviewsGrid}>
+                {uploadedPhotos.map((photo, index) => (
+                  <div key={photo.id} className={styles.photoPreviewCard}>
+                    <div className={styles.photoImageWrapper}>
+                      <img
+                        src={photo.dataUrl}
+                        alt={`Food photo ${index + 1}`}
+                        className={styles.photoImage}
+                      />
+                      <button
+                        type="button"
+                        className={styles.removePhotoBtn}
+                        onClick={() => handleRemovePhoto(photo.id)}
+                        aria-label={`Remove photo ${photo.name}`}
+                        title="Remove photo"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className={styles.photoMetaRow}>
+                      <span className={styles.photoFileName} title={photo.name}>
+                        {photo.name}
+                      </span>
+                      <span className={styles.photoFileSize}>{photo.size}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Submit Button */}
         <div className={styles.submitRow}>
           <button type="submit" className={styles.submitBtn} id="submit-feedback-btn">
@@ -483,7 +741,7 @@ export default function FeedbackPage() {
             </div>
             <h3 className={styles.successTitle}>Feedback Recorded!</h3>
             <p className={styles.successText}>
-              Thank you! Your star ratings and dish feedback for Today&apos;s <strong>{lastSubmittedMealName}</strong> have been recorded and sent to the BH-1 Central Kitchen quality supervisor.
+              Thank you! Your star ratings, dish feedback{submittedPhotoCount > 0 ? `, and ${submittedPhotoCount} attached food ${submittedPhotoCount === 1 ? "photo" : "photos"}` : ""} for Today&apos;s <strong>{lastSubmittedMealName}</strong> have been recorded and sent to the BH-1 Central Kitchen quality supervisor.
             </p>
             <button
               type="button"

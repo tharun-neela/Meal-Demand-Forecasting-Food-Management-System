@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -119,80 +120,6 @@ const MONTHLY_MEAL_ACCESS_DATA: MonthlyMealRecord[] = [
   { month: "Dec", fullName: "December", breakfast: 22, lunch: 24, snacks: 18, dinner: 22 },
 ];
 
-// Interactive High-Contrast Tooltip for Grouped Bar Chart
-function CustomBarTooltip({ active, payload, label }: any) {
-  if (active && payload && payload.length) {
-    const data = payload[0]?.payload;
-    if (!data) return null;
-    const total =
-      (data.breakfast || 0) +
-      (data.lunch || 0) +
-      (data.snacks || 0) +
-      (data.dinner || 0);
-
-    return (
-      <div className={styles.barTooltipContainer}>
-        <div className={styles.barTooltipHeader}>
-          <span className={styles.barTooltipMonth}>{data.fullName || label}</span>
-          <span className={styles.barTooltipTotal}>{total} Meals Accessed</span>
-        </div>
-        <div className={styles.barTooltipDivider} />
-        <div className={styles.barTooltipRows}>
-          <div className={styles.barTooltipRow}>
-            <div className={styles.barTooltipLeft}>
-              <span
-                className={styles.legendColorDot}
-                style={{ backgroundColor: "#2563eb" }}
-              />
-              <span className={styles.barTooltipName}>Breakfast:</span>
-            </div>
-            <span className={styles.barTooltipVal}>
-              <strong>{data.breakfast}</strong> breakfast accessed in {label}
-            </span>
-          </div>
-          <div className={styles.barTooltipRow}>
-            <div className={styles.barTooltipLeft}>
-              <span
-                className={styles.legendColorDot}
-                style={{ backgroundColor: "#0f172a" }}
-              />
-              <span className={styles.barTooltipName}>Lunch:</span>
-            </div>
-            <span className={styles.barTooltipVal}>
-              <strong>{data.lunch}</strong> lunch accessed in {label}
-            </span>
-          </div>
-          <div className={styles.barTooltipRow}>
-            <div className={styles.barTooltipLeft}>
-              <span
-                className={styles.legendColorDot}
-                style={{ backgroundColor: "#10b981" }}
-              />
-              <span className={styles.barTooltipName}>Snacks:</span>
-            </div>
-            <span className={styles.barTooltipVal}>
-              <strong>{data.snacks}</strong> snacks accessed in {label}
-            </span>
-          </div>
-          <div className={styles.barTooltipRow}>
-            <div className={styles.barTooltipLeft}>
-              <span
-                className={styles.legendColorDot}
-                style={{ backgroundColor: "#f36f21" }}
-              />
-              <span className={styles.barTooltipName}>Dinner:</span>
-            </div>
-            <span className={styles.barTooltipVal}>
-              <strong>{data.dinner}</strong> dinner accessed in {label}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return null;
-}
-
 export default function MealAnalyticsPage() {
   const [showInfoModal, setShowInfoModal] = useState<boolean>(false);
   const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
@@ -204,12 +131,52 @@ export default function MealAnalyticsPage() {
   const [selectedYear, setSelectedYear] = useState<string>("2024");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
 
+  // Grouped bar chart interactive hover state (dimmed by default, highlighted on group hover, single bar tooltip)
+  const [hoveredMonthIndex, setHoveredMonthIndex] = useState<number | null>(null);
+  const [hoveredSingleBar, setHoveredSingleBar] = useState<{
+    meal: string;
+    value: number;
+    month: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
+
+  const handleBarHover = (
+    meal: string,
+    value: number,
+    month: string,
+    monthIndex: number,
+    e: React.MouseEvent<SVGElement>
+  ) => {
+    setHoveredMonthIndex(monthIndex);
+    if (!chartWrapperRef.current) return;
+    const containerRect = chartWrapperRef.current.getBoundingClientRect();
+    const barRect = e.currentTarget.getBoundingClientRect();
+
+    const x = barRect.left - containerRect.left + barRect.width / 2;
+    const y = barRect.top - containerRect.top;
+
+    setHoveredSingleBar({
+      meal,
+      value,
+      month,
+      x,
+      y,
+    });
+  };
+
+  const handleBarLeave = () => {
+    setHoveredSingleBar(null);
+  };
+
   // Simultaneous rapid count-up state for cards & donut graph
   const [counts, setCounts] = useState({
     accessed: 0,
     missed: 0,
     moneyLost: 0,
     waste: 0,
+    attendance: 0,
   });
 
   useEffect(() => {
@@ -225,6 +192,7 @@ export default function MealAnalyticsPage() {
         missed: 30,
         moneyLost: 1500,
         waste: 83,
+        attendance: 80,
       });
       return;
     }
@@ -246,6 +214,7 @@ export default function MealAnalyticsPage() {
         missed: Math.round(ease * 30),
         moneyLost: Math.round(ease * 1500),
         waste: Math.round(ease * 83),
+        attendance: Math.round(ease * 80),
       });
 
       if (progress < 1) {
@@ -256,6 +225,7 @@ export default function MealAnalyticsPage() {
           missed: 30,
           moneyLost: 1500,
           waste: 83,
+          attendance: 80,
         });
       }
     };
@@ -282,6 +252,16 @@ export default function MealAnalyticsPage() {
   const whitePath = describeDonutArc(cx, cy, rInner, rOuter, 180.05, 287.95);
   // 3. Breakfast (Blue) on the top-left: 288° to 360° (20%)
   const bluePath = describeDonutArc(cx, cy, rInner, rOuter, 288.05, 359.95);
+
+  // Semi-circular Attendance Gauge Geometry
+  const gaugeAngleDeg = 180 - ((counts.attendance || 0) / 100) * 180;
+  const gaugeRad = (gaugeAngleDeg * Math.PI) / 180;
+  const needleCoords = {
+    x1: 125 + 64 * Math.cos(gaugeRad),
+    y1: 118 - 64 * Math.sin(gaugeRad),
+    x2: 125 + 100 * Math.cos(gaugeRad),
+    y2: 118 - 100 * Math.sin(gaugeRad),
+  };
 
   return (
     <div className={styles.analyticsContainer}>
@@ -463,75 +443,214 @@ export default function MealAnalyticsPage() {
 
           {/* Grouped Bar Chart Render */}
           {isMounted ? (
-            <ResponsiveContainer width="100%" height={295}>
-              <BarChart
-                data={MONTHLY_MEAL_ACCESS_DATA}
-                margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
-                barGap={3}
-                barCategoryGap="26%"
-              >
-                <CartesianGrid
-                  strokeDasharray="4 4"
-                  vertical={false}
-                  stroke="#e2e8f0"
-                />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }}
-                  dy={6}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
-                  domain={[0, 40]}
-                  ticks={[0, 10, 20, 30, 40]}
-                  dx={-4}
-                />
-                <Tooltip
-                  content={<CustomBarTooltip />}
-                  cursor={{ fill: "rgba(241, 245, 249, 0.6)", radius: 6 }}
-                />
-                {(selectedFilter === "all" || selectedFilter === "Breakfast") && (
-                  <Bar
-                    dataKey="breakfast"
-                    name="Breakfast"
-                    fill="#2563eb"
-                    radius={[3.5, 3.5, 0, 0]}
-                    maxBarSize={8.5}
+            <div
+              className={styles.chartWrapper}
+              ref={chartWrapperRef}
+              onMouseLeave={() => {
+                setHoveredMonthIndex(null);
+                setHoveredSingleBar(null);
+              }}
+            >
+              <ResponsiveContainer width="100%" height={295}>
+                <BarChart
+                  data={MONTHLY_MEAL_ACCESS_DATA}
+                  margin={{ top: 20, right: 8, left: -20, bottom: 0 }}
+                  barGap={2}
+                  barCategoryGap="26%"
+                  onMouseMove={(state: any) => {
+                    if (state && typeof state.activeTooltipIndex === "number") {
+                      setHoveredMonthIndex(state.activeTooltipIndex);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredMonthIndex(null);
+                    setHoveredSingleBar(null);
+                  }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="4 4"
+                    vertical={false}
+                    stroke="#e2e8f0"
                   />
-                )}
-                {(selectedFilter === "all" || selectedFilter === "Lunch") && (
-                  <Bar
-                    dataKey="lunch"
-                    name="Lunch"
-                    fill="#0f172a"
-                    radius={[3.5, 3.5, 0, 0]}
-                    maxBarSize={8.5}
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }}
+                    dy={6}
                   />
-                )}
-                {(selectedFilter === "all" || selectedFilter === "Snacks") && (
-                  <Bar
-                    dataKey="snacks"
-                    name="Snacks"
-                    fill="#10b981"
-                    radius={[3.5, 3.5, 0, 0]}
-                    maxBarSize={8.5}
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
+                    domain={[0, 40]}
+                    ticks={[0, 10, 20, 30, 40]}
+                    dx={-4}
                   />
-                )}
-                {(selectedFilter === "all" || selectedFilter === "Dinner") && (
-                  <Bar
-                    dataKey="dinner"
-                    name="Dinner"
-                    fill="#f36f21"
-                    radius={[3.5, 3.5, 0, 0]}
-                    maxBarSize={8.5}
-                  />
-                )}
-              </BarChart>
-            </ResponsiveContainer>
+                  <Tooltip cursor={false} content={() => null} />
+                  {(selectedFilter === "all" || selectedFilter === "Breakfast") && (
+                    <Bar
+                      dataKey="breakfast"
+                      name="Breakfast"
+                      fill="#2563eb"
+                      radius={[3.5, 3.5, 0, 0]}
+                      maxBarSize={9.5}
+                    >
+                      {MONTHLY_MEAL_ACCESS_DATA.map((entry, index) => {
+                        const isGroupActive = hoveredMonthIndex === index;
+                        const opacity = isGroupActive ? 1 : 0.22;
+                        return (
+                          <Cell
+                            key={`cell-breakfast-${index}`}
+                            fill="#2563eb"
+                            opacity={opacity}
+                            cursor="pointer"
+                            style={{
+                              transition: "opacity 0.2s ease, filter 0.15s ease",
+                              filter:
+                                hoveredSingleBar?.meal === "Breakfast" && isGroupActive
+                                  ? "brightness(1.15)"
+                                  : "none",
+                            }}
+                            onMouseEnter={(e: any) =>
+                              handleBarHover("Breakfast", entry.breakfast, entry.month, index, e)
+                            }
+                            onMouseMove={(e: any) =>
+                              handleBarHover("Breakfast", entry.breakfast, entry.month, index, e)
+                            }
+                            onMouseLeave={handleBarLeave}
+                          />
+                        );
+                      })}
+                    </Bar>
+                  )}
+                  {(selectedFilter === "all" || selectedFilter === "Lunch") && (
+                    <Bar
+                      dataKey="lunch"
+                      name="Lunch"
+                      fill="#0f172a"
+                      radius={[3.5, 3.5, 0, 0]}
+                      maxBarSize={9.5}
+                    >
+                      {MONTHLY_MEAL_ACCESS_DATA.map((entry, index) => {
+                        const isGroupActive = hoveredMonthIndex === index;
+                        const opacity = isGroupActive ? 1 : 0.22;
+                        return (
+                          <Cell
+                            key={`cell-lunch-${index}`}
+                            fill="#0f172a"
+                            opacity={opacity}
+                            cursor="pointer"
+                            style={{
+                              transition: "opacity 0.2s ease, filter 0.15s ease",
+                              filter:
+                                hoveredSingleBar?.meal === "Lunch" && isGroupActive
+                                  ? "brightness(1.2)"
+                                  : "none",
+                            }}
+                            onMouseEnter={(e: any) =>
+                              handleBarHover("Lunch", entry.lunch, entry.month, index, e)
+                            }
+                            onMouseMove={(e: any) =>
+                              handleBarHover("Lunch", entry.lunch, entry.month, index, e)
+                            }
+                            onMouseLeave={handleBarLeave}
+                          />
+                        );
+                      })}
+                    </Bar>
+                  )}
+                  {(selectedFilter === "all" || selectedFilter === "Snacks") && (
+                    <Bar
+                      dataKey="snacks"
+                      name="Snacks"
+                      fill="#10b981"
+                      radius={[3.5, 3.5, 0, 0]}
+                      maxBarSize={9.5}
+                    >
+                      {MONTHLY_MEAL_ACCESS_DATA.map((entry, index) => {
+                        const isGroupActive = hoveredMonthIndex === index;
+                        const opacity = isGroupActive ? 1 : 0.22;
+                        return (
+                          <Cell
+                            key={`cell-snacks-${index}`}
+                            fill="#10b981"
+                            opacity={opacity}
+                            cursor="pointer"
+                            style={{
+                              transition: "opacity 0.2s ease, filter 0.15s ease",
+                              filter:
+                                hoveredSingleBar?.meal === "Snacks" && isGroupActive
+                                  ? "brightness(1.15)"
+                                  : "none",
+                            }}
+                            onMouseEnter={(e: any) =>
+                              handleBarHover("Snacks", entry.snacks, entry.month, index, e)
+                            }
+                            onMouseMove={(e: any) =>
+                              handleBarHover("Snacks", entry.snacks, entry.month, index, e)
+                            }
+                            onMouseLeave={handleBarLeave}
+                          />
+                        );
+                      })}
+                    </Bar>
+                  )}
+                  {(selectedFilter === "all" || selectedFilter === "Dinner") && (
+                    <Bar
+                      dataKey="dinner"
+                      name="Dinner"
+                      fill="#f36f21"
+                      radius={[3.5, 3.5, 0, 0]}
+                      maxBarSize={9.5}
+                    >
+                      {MONTHLY_MEAL_ACCESS_DATA.map((entry, index) => {
+                        const isGroupActive = hoveredMonthIndex === index;
+                        const opacity = isGroupActive ? 1 : 0.22;
+                        return (
+                          <Cell
+                            key={`cell-dinner-${index}`}
+                            fill="#f36f21"
+                            opacity={opacity}
+                            cursor="pointer"
+                            style={{
+                              transition: "opacity 0.2s ease, filter 0.15s ease",
+                              filter:
+                                hoveredSingleBar?.meal === "Dinner" && isGroupActive
+                                  ? "brightness(1.15)"
+                                  : "none",
+                            }}
+                            onMouseEnter={(e: any) =>
+                              handleBarHover("Dinner", entry.dinner, entry.month, index, e)
+                            }
+                            onMouseMove={(e: any) =>
+                              handleBarHover("Dinner", entry.dinner, entry.month, index, e)
+                            }
+                            onMouseLeave={handleBarLeave}
+                          />
+                        );
+                      })}
+                    </Bar>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+
+              {/* Minimalist Floating Single Bar Number Badge (Referenced from Sample Pic) */}
+              {hoveredSingleBar && (
+                <div
+                  className={styles.singleBarTooltip}
+                  style={{
+                    left: `${hoveredSingleBar.x}px`,
+                    top: `${hoveredSingleBar.y - 7}px`,
+                  }}
+                >
+                  <div className={styles.singleBarPill}>
+                    <span>{hoveredSingleBar.value}</span>
+                  </div>
+                  <div className={styles.singleBarCaret} />
+                </div>
+              )}
+            </div>
           ) : (
             <div
               style={{
@@ -546,6 +665,93 @@ export default function MealAnalyticsPage() {
               Loading meal attendance trends...
             </div>
           )}
+        </div>
+
+        {/* ============================================================
+            ATTENDANCE GAUGE KPI CARD (Below Grouped Bar Chart, Left Side)
+            ============================================================ */}
+        <div className={styles.bottomRowLeft}>
+          <div className={styles.attendanceGaugeCard}>
+            {/* Header: Title "Attendance" with 3-dots removed */}
+            <div className={styles.gaugeHeader}>
+              <h3 className={styles.gaugeCardTitle}>Attendance</h3>
+            </div>
+
+            {/* Semi-circular Gauge Chart */}
+            <div className={styles.gaugeChartWrapper}>
+              <svg
+                viewBox="0 0 250 135"
+                className={styles.gaugeSvg}
+                role="img"
+                aria-label={`Attendance rate ${counts.attendance}%`}
+              >
+                {/* Gray Background Track */}
+                <path
+                  d="M 43 118 A 82 82 0 0 1 207 118"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  strokeWidth="22"
+                  strokeLinecap="butt"
+                />
+
+                {/* Indigo/Purple Progress Arc */}
+                <path
+                  d="M 43 118 A 82 82 0 0 1 207 118"
+                  fill="none"
+                  stroke="#5846f6"
+                  strokeWidth="22"
+                  strokeLinecap="butt"
+                  strokeDasharray={`${((counts.attendance || 0) / 100) * 257.61} 257.61`}
+                  strokeDashoffset="0"
+                />
+
+                {/* Target Indicator Needle */}
+                <line
+                  x1={needleCoords.x1}
+                  y1={needleCoords.y1}
+                  x2={needleCoords.x2}
+                  y2={needleCoords.y2}
+                  stroke="#4338ca"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                />
+
+                {/* Large Bold Orange Percentage */}
+                <text
+                  x={125}
+                  y={108}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#ea580c"
+                  fontSize="40"
+                  fontWeight="800"
+                  fontFamily="inherit"
+                >
+                  {counts.attendance}%
+                </text>
+              </svg>
+            </div>
+
+            {/* Bottom Trend Pill Badge */}
+            <div className={styles.gaugePill}>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#ea580c"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+              <span>
+                Attendance is <strong className={styles.gaugeHighlight}>8.5%</strong> more than last Month
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

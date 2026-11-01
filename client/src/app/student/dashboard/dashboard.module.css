@@ -1,0 +1,1377 @@
+/* ============================================================
+   STUDENT DASHBOARD - GREETING & GITHUB-STYLE HEATMAP
+   ============================================================ */
+
+.dashboardContainer {
+  width: 100%;
+  padding: 0.75rem 2.25rem 2.5rem 2.25rem;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   HERO GREETING BANNER CARD
+   ============================================================ */
+
+.greetingHeroCard {
+  background: linear-gradient(135deg, #ffffff 0%, #fffbf7 60%, #fff7ed 100%);
+  border: 1.5px solid #fed7aa;
+  border-radius: 20px;
+  padding: 1.5rem 2.25rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -5px rgba(243, 111, 33, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  animation: heroFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.greetingHeroCard:hover {
+  transform: translateY(-2px);
+  border-color: #f97316;
+  box-shadow: 0 12px 36px -6px rgba(243, 111, 33, 0.16), 0 4px 14px -2px rgba(15, 23, 42, 0.05);
+}
+
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.greetingHeroCard::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(243, 111, 33, 0.12) 0%, rgba(243, 111, 33, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.greetingActionPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ea580c;
+  color: #ffffff;
+  padding: 0.65rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px -1px rgba(234, 88, 12, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.greetingHeroCard:hover .greetingActionPill {
+  background-color: #c2410c;
+  transform: scale(1.03);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.45);
+}
+
+.greetingFeedbackPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  padding: 0.65rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px -1px rgba(234, 88, 12, 0.38);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.greetingHeroCard:hover .greetingFeedbackPill {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  transform: scale(1.03);
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.48);
+}
+
+.greetingActionArrow {
+  transition: transform 0.2s ease;
+}
+
+.greetingHeroCard:hover .greetingActionArrow {
+  transform: translateX(3px);
+}
+
+/* Primary Student Greeting Headline */
+.greetingHeadline {
+  font-size: 2.15rem;
+  font-weight: 750;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  animation: greetingFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes greetingFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.greetingSalutation {
+  display: inline-block;
+  color: #0f172a;
+}
+
+.greetingStudentName {
+  font-weight: 850;
+  color: #ea580c;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.greetingStudentName:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.greetingPunctuation {
+  display: inline-block;
+  color: #0f172a;
+}
+
+.greetingQuestion {
+  display: inline-block;
+  color: #334155;
+}
+
+/* ============================================================
+   GITHUB STYLE MEAL ATTENDANCE HEATMAP CARD (JAN TO DEC)
+   Spreads edge-to-edge across the entire card width
+   ============================================================ */
+
+.heatmapCard {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  animation: heroFadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.heatmapHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.heatmapTitle {
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+/* Top Year Dropdown Menu */
+.yearDropdownWrapper {
+  position: relative;
+  user-select: none;
+}
+
+.yearDropdownBtn {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #0f172a;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.yearDropdownBtn:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.yearChevron {
+  display: inline-flex;
+  transition: transform 0.18s ease;
+  color: #64748b;
+}
+
+.yearDropdownMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.35rem;
+  min-width: 155px;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.12);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  animation: dropdownPop 0.15s ease-out;
+}
+
+@keyframes dropdownPop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.yearDropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+
+.yearDropdownItem:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.yearDropdownItemActive {
+  background-color: #fff7ed;
+  color: #ea580c;
+  font-weight: 750;
+}
+
+/* Scroll area for responsive horizontal scroll */
+.heatmapScrollArea {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  position: relative;
+}
+
+.heatmapInner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  min-width: 780px;
+  user-select: none;
+}
+
+/* Weeks Grid: Spreads across 100% of the available width to acquire remaining space */
+.weeksGrid {
+  display: flex;
+  width: 100%;
+  gap: 3px;
+  justify-content: space-between;
+}
+
+.weekCol {
+  flex: 1 1 0px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Base Cell: Refined compact square, scales gracefully across columns */
+.cell {
+  width: 100%;
+  max-width: 13px;
+  max-height: 13px;
+  aspect-ratio: 1 / 1;
+  border-radius: 2.5px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  position: relative;
+}
+
+.cell:hover {
+  transform: scale(1.35);
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+}
+
+/* Meal Access Count Color Progression:
+   0: Clear light grey empty cell (clearly visible!)
+   1: Soft peach-orange
+   2: Light orange stroke
+   3: Medium-orange stroke
+   4: Thick orange stroke
+*/
+.cell0 {
+  background-color: #ebedf0;
+  border: 1px solid #dcdfe4;
+}
+
+.cell1 {
+  background-color: #fed7aa;
+  border: 1.5px solid #fdba74;
+}
+
+.cell2 {
+  background-color: #fdba74;
+  border: 1.5px solid #fb923c;
+}
+
+.cell3 {
+  background-color: #fb923c;
+  border: 1.5px solid #ea580c;
+}
+
+.cell4 {
+  background-color: #ea580c;
+  border: 2px solid #c2410c;
+}
+
+/* Months Row Along the Bottom (Jan to Dec, spanning 100% width) */
+.monthsRow {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 18px;
+  margin-top: 0.2rem;
+}
+
+.monthLabel {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748b;
+  position: absolute;
+  transform: translateX(-15%);
+  white-space: nowrap;
+}
+
+/* Heatmap Footer: Less to More Stroke Legend at the Bottom */
+.heatmapFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.heatmapLegend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legendText {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0.2rem;
+}
+
+.legendCell {
+  width: 11.5px;
+  height: 11.5px;
+  border-radius: 2.5px;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+/* Floating interactive minimalist tooltip */
+.tooltipBubble {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  z-index: 50;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 0.24rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.28);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -6px;
+  line-height: 1;
+}
+
+.tooltipBubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: #0f172a transparent transparent transparent;
+}
+
+.tooltipCount {
+  color: #fed7aa;
+  font-weight: 700;
+}
+
+/* ============================================================
+   BOTTOM SECTION: TODAY'S MENU CARD (REFERENCE UI REPLICA)
+   White background theme with 3-column dish card grid
+   ============================================================ */
+
+.bottomRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Left Column: Groups Today's Menu and Recent Meal History cards */
+.leftColumn {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.todayMenuCard {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.35rem 1.6rem;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: heroFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.todayMenuCard:hover {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.07);
+}
+
+.todayMenuHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.todayMenuMeta {
+  display: flex;
+  flex-direction: column;
+}
+
+.todayMenuSub {
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ea580c;
+}
+
+.todayMenuHeading {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0.1rem 0 0.05rem 0;
+  line-height: 1.2;
+}
+
+.todayMenuTiming {
+  font-size: 0.78rem;
+  font-weight: 550;
+  color: #64748b;
+}
+
+/* Mess Status Live Badges */
+.messOpenBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1.5px solid #a7f3d0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
+}
+
+.pulseDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #10b981;
+  position: relative;
+  display: inline-block;
+  animation: liveDotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes liveDotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+  }
+}
+
+.messClosedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #f8fafc;
+  color: #64748b;
+  border: 1.5px solid #e2e8f0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.menuDivider {
+  width: 100%;
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 0.85rem 0 0.95rem 0;
+}
+
+/* Container for all Sections */
+.menuSectionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* 3-Column Dish Cards Grid */
+.dishCardsGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  width: 100%;
+}
+
+/* Split Row Group: 2fr for Left (e.g. Breads) and 1fr for Right (e.g. Dessert) */
+.splitRowGroup {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.splitColLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.splitColRight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dishCardsGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.dishCardsGrid1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+/* Individual Dish Card (Spacious with Centered Dish Name & Balanced Proportions) */
+.dishCard {
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  min-height: 52px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.dishCard:hover {
+  background-color: #ffffff;
+  border-color: #fed7aa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px -2px rgba(234, 88, 12, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+}
+
+.dishCardTop {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
+}
+
+.dishCategoryPill {
+  font-size: 0.6rem;
+  font-weight: 650;
+  color: #64748b;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 0.08rem 0.38rem;
+  border-radius: 9999px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  transition: all 0.15s ease;
+}
+
+.dishCard:hover .dishCategoryPill {
+  background-color: #fff7ed;
+  color: #ea580c;
+  border-color: #fed7aa;
+}
+
+.dishCardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0;
+}
+
+.dishCardTitle {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* ============================================================
+   RECENT MEAL HISTORY CARD (REFERENCE UI REPLICA)
+   Matches the uploaded figure with status icon circles and dashed borders
+   ============================================================ */
+
+.recentHistoryCard {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.25rem 1.45rem;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 395px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: heroFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.recentHistoryCard:hover {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.07);
+}
+
+.recentHistoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.recentHistoryTitle {
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.recentHistoryViewAll {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.15s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.recentHistoryViewAll:hover {
+  color: #ea580c;
+  transform: translateX(1px);
+}
+
+.recentHistoryList {
+  display: flex;
+  flex-direction: column;
+}
+
+.recentHistoryItem {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+  transition: background-color 0.15s ease;
+}
+
+.recentHistoryItem:first-child {
+  padding-top: 0.35rem;
+}
+
+.recentHistoryItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0.15rem;
+}
+
+.historyIconCircle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.iconApproved {
+  background-color: #22c55e;
+}
+
+.iconRejected {
+  background-color: #ef4444;
+}
+
+.iconFraud {
+  background-color: #ef4444;
+}
+
+.historyItemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.historyItemTitle {
+  font-size: 0.94rem;
+  font-weight: 650;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.highlightBlue {
+  color: #0284c7;
+  font-weight: 700;
+}
+
+.historyItemDate {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* ============================================================
+   RIGHT COLUMN: DAILY FOOD WASTAGE DONUT CARD
+   Exact same dimensions (width: 325px) as in Meal Analytics page
+   ============================================================ */
+
+.wastageCardWrapper {
+  width: 325px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.wastageCard {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.35rem 1.35rem 1.45rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  width: 100%;
+}
+
+.wastageCard:hover {
+  box-shadow: 0 8px 22px -3px rgba(15, 23, 42, 0.07);
+}
+
+.wastageCardTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.015em;
+  text-align: center;
+}
+
+/* Donut Chart Container */
+.chartContainer {
+  position: relative;
+  width: 185px;
+  height: 185px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.donutSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.03));
+  animation: donutRotateSweep 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+
+@keyframes donutRotateSweep {
+  0% {
+    transform: rotate(-100deg) scale(0.85);
+    opacity: 0.2;
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.donutSegment {
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.donutSegment:hover {
+  opacity: 0.92;
+}
+
+.chartCenterOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.centerNumber {
+  font-size: 1.95rem;
+  font-weight: 750;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.centerUnit {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Context Text Below Chart */
+.subtitleNote {
+  font-size: 0.8rem;
+  font-weight: 550;
+  color: #475569;
+  text-align: center;
+  margin: 0.95rem 0 0.85rem 0;
+  line-height: 1.4;
+}
+
+/* More Information Button */
+.moreInfoBtn {
+  width: 100%;
+  padding: 0.62rem 0.95rem;
+  border-radius: 11px;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  margin-bottom: 1.05rem;
+  font-family: inherit;
+}
+
+.moreInfoBtn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
+
+.moreInfoBtn:active {
+  transform: translateY(0);
+}
+
+/* Legend List at the bottom */
+.legendList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  padding: 0.1rem 0;
+  cursor: pointer;
+}
+
+.legendLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.legendDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-weight: 600;
+  color: #334155;
+}
+
+.legendRight {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.legendKg {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.legendPercent {
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* Zero Food Waste Awareness Banner */
+.wasteAwarenessCard {
+  width: 100%;
+  margin-top: 1.15rem;
+  padding: 0.95rem 1rem;
+  background: linear-gradient(145deg, #fffaf5 0%, #fff6ee 100%);
+  border: 1.5px solid #fed7aa;
+  border-radius: 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  text-align: left;
+}
+
+.awarenessHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.awarenessBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ea580c;
+  background-color: #ffedd5;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.awarenessTitle {
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: #9a3412;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.awarenessQuote {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #7c2d12;
+  margin: 0;
+  font-style: italic;
+  opacity: 0.95;
+}
+
+.awarenessTipBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  background-color: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: 9px;
+  padding: 0.55rem 0.65rem;
+  box-sizing: border-box;
+}
+
+.awarenessTipIcon {
+  font-size: 1.05rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.awarenessTipText {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: #451a03;
+}
+
+.awarenessTipText strong {
+  font-weight: 750;
+  color: #9a3412;
+  display: inline;
+}
+
+/* Modal Popup for Detailed Information */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modalCard {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 440px;
+  width: 100%;
+  padding: 1.75rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: modalPopIn 0.18s ease-out;
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modalTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.modalCloseBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.modalDetailRows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modalDetailItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.95rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.modalDetailLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.modalDetailTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modalDetailTiming {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.modalDetailRight {
+  text-align: right;
+}
+
+.modalDetailWeight {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.modalDetailPercent {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.modalFooterNote {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.45;
+  background-color: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+/* Skeleton Loading State for Menu Card */
+.skeletonTitle {
+  width: 140px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  margin: 0.25rem 0 0.35rem 0;
+}
+
+.skeletonTiming {
+  width: 170px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+}
+
+.skeletonBadge {
+  width: 100px;
+  height: 28px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+}
+
+.skeletonSectionHeader {
+  width: 120px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  margin-bottom: 0.75rem;
+}
+
+.skeletonDishCard {
+  min-height: 72px;
+  background: linear-gradient(90deg, #f8fafc 25%, #f1f5f9 50%, #f8fafc 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-color: #f1f5f9;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .todayMenuCard {
+    max-width: 100%;
+    padding: 1.35rem 1.25rem;
+  }
+  .dishCardsGrid3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .splitRowGroup {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 1.25rem 1rem 3rem 1rem;
+    gap: 1.25rem;
+  }
+  .greetingHeroCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.35rem 1.25rem;
+  }
+  .greetingHeadline {
+    font-size: 1.65rem;
+  }
+  .heatmapCard {
+    padding: 1.25rem 1rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .dishCardsGrid3,
+  .dishCardsGrid2 {
+    grid-template-columns: 1fr;
+  }
+  .todayMenuHeading {
+    font-size: 1.5rem;
+  }
+}

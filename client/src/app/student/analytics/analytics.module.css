@@ -722,82 +722,146 @@
   animation: modalPopIn 0.15s ease-out;
 }
 
-/* High-Contrast Interactive Custom Tooltip */
-.barTooltipContainer {
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 0.85rem 1.05rem;
-  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.15);
-  min-width: 260px;
+/* Minimalist Single Bar Floating Number Tooltip (Matching Sample Pic Reference) */
+.chartWrapper {
+  position: relative;
+  width: 100%;
+  height: 295px;
+}
+
+.singleBarTooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
   pointer-events: none;
-  box-sizing: border-box;
-}
-
-.barTooltipHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.barTooltipMonth {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: -0.01em;
-}
-
-.barTooltipTotal {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #ea580c;
-  background-color: #fff7ed;
-  padding: 0.18rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ffedd5;
-}
-
-.barTooltipDivider {
-  height: 1px;
-  background-color: #f1f5f9;
-  margin: 0.65rem 0;
-}
-
-.barTooltipRows {
+  z-index: 50;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  align-items: center;
+  transition: left 0.12s cubic-bezier(0.16, 1, 0.3, 1), top 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: barTooltipPop 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.barTooltipRow {
+@keyframes barTooltipPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -82%) scale(0.88);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+  }
+}
+
+.singleBarPill {
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 0.26rem 0.62rem;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.28);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  gap: 0.75rem;
+  justify-content: center;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.barTooltipLeft {
+.singleBarCaret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #0f172a;
+  margin-top: -0.5px;
+}
+
+/* ============================================================
+   ATTENDANCE GAUGE KPI CARD (Below Grouped Bar Chart, Left Side)
+   ============================================================ */
+
+.bottomRowLeft {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.attendanceGaugeCard {
+  width: 320px;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  animation: cardFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.attendanceGaugeCard:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 22px -3px rgba(15, 23, 42, 0.07);
+}
+
+.gaugeHeader {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: flex-start;
+  margin-bottom: 0.25rem;
 }
 
-.barTooltipName {
-  font-weight: 600;
-  color: #475569;
-}
-
-.barTooltipVal {
-  color: #334155;
-  font-size: 0.8rem;
-  text-align: right;
-}
-
-.barTooltipVal strong {
-  font-weight: 800;
+.gaugeCardTitle {
+  font-size: 1.12rem;
+  font-weight: 750;
   color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.gaugeChartWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.4rem;
+  position: relative;
+}
+
+.gaugeSvg {
+  width: 250px;
+  height: 135px;
+  overflow: visible;
+  display: block;
+}
+
+.gaugePill {
+  margin-top: 0.75rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.48rem 0.85rem;
+  border-radius: 9999px;
+  background-color: #faf5ff;
+  border: 1px solid #e9d5ff;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #581c87;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.gaugeHighlight {
+  color: #ea580c;
+  font-weight: 800;
 }
 
 /* Responsive Breakpoints */
