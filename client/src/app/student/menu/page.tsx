@@ -38,26 +38,48 @@ export default function StudentMenuPage() {
   const wheelAcc = useRef<number>(0);
   const lastWheelTime = useRef<number>(0);
 
+  // Ref to track if initial mount has occurred
+  const hasInitializedRef = useRef<boolean>(false);
+
   // Read real client device date on mount and track live clock
   useEffect(() => {
-    const updateTimeAndDate = () => {
-      const now = new Date();
-      const clientToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const key = formatDateKey(clientToday);
+    const now = new Date();
+    const clientToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const key = formatDateKey(clientToday);
 
+    // Initial load: set today's date, anchor, and default selected date to today
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
       setTodayDate(clientToday);
       setTodayAnchor(clientToday);
       setSelectedDateKey(key);
       setCurrentMinutes(now.getHours() * 60 + now.getMinutes());
+    }
+
+    // Periodic live clock tracker for meal status badges (does NOT overwrite user's selected day)
+    const updateLiveClock = () => {
+      const currentNow = new Date();
+      setCurrentMinutes(currentNow.getHours() * 60 + currentNow.getMinutes());
+
+      // If midnight rolls over while user has tab open, update todayDate reference
+      const currentToday = new Date(
+        currentNow.getFullYear(),
+        currentNow.getMonth(),
+        currentNow.getDate()
+      );
+      setTodayDate((prevToday) => {
+        if (prevToday.getTime() !== currentToday.getTime()) {
+          return currentToday;
+        }
+        return prevToday;
+      });
     };
 
-    updateTimeAndDate();
-
     // Check periodically for live status updates or midnight rollover
-    window.addEventListener("focus", updateTimeAndDate);
-    const timer = setInterval(updateTimeAndDate, 15000);
+    window.addEventListener("focus", updateLiveClock);
+    const timer = setInterval(updateLiveClock, 15000);
     return () => {
-      window.removeEventListener("focus", updateTimeAndDate);
+      window.removeEventListener("focus", updateLiveClock);
       clearInterval(timer);
     };
   }, []);

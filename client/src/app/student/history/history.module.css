@@ -181,61 +181,181 @@
   font-weight: 700;
 }
 
-/* Date Picker Dropdown Popover */
-.dateDropdown {
+/* Calendar Popover Panel matching user figure */
+.calendarPopover {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
-  padding: 1rem;
-  min-width: 240px;
-  z-index: 50;
+  width: 320px;
+  background-color: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.16), 0 6px 14px -2px rgba(15, 23, 42, 0.06);
+  padding: 1.25rem 1.15rem 1rem 1.15rem;
+  z-index: 70;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   animation: dropdownPop 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.dateInputLabel {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #475569;
-}
-
-.dateNativeInput {
-  width: 100%;
-  padding: 0.45rem 0.65rem;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.84rem;
-  color: #0f172a;
-  outline: none;
-  font-family: inherit;
   box-sizing: border-box;
 }
 
-.dateNativeInput:focus {
-  border-color: #ea580c;
-}
-
-.dateActionRow {
+.calendarNavHeader {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.15rem;
 }
 
-.dateClearBtn {
+.calendarMonthTitle {
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.calendarNavBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calendarNavBtn:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.calendarWeekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.76rem;
+  font-weight: 750;
+  color: #8fa0b5;
+  text-transform: uppercase;
+  padding: 0.35rem 0 0.15rem 0;
+}
+
+.calendarDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 6px;
+  column-gap: 4px;
+}
+
+.calendarEmptyCell {
+  height: 38px;
+  width: 38px;
+}
+
+.calendarDayCell {
+  height: 38px;
+  width: 38px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  font-family: inherit;
+}
+
+.calendarDayCell:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.calendarDayCellToday {
+  color: #f36f21;
+  font-weight: 700;
+}
+
+.calendarDayCellActive {
+  background-color: #f36f21 !important;
+  color: #ffffff !important;
+  font-weight: 750 !important;
+  box-shadow: 0 4px 12px rgba(243, 111, 33, 0.4);
+}
+
+.calendarFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.85rem;
+  margin-top: 0.35rem;
+}
+
+.calendarTodayBtn {
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: #f36f21;
   background: none;
   border: none;
-  color: #64748b;
-  font-size: 0.8rem;
-  font-weight: 600;
   cursor: pointer;
-  padding: 0.35rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.2rem 0;
+  font-family: inherit;
+  transition: opacity 0.15s ease;
+}
+
+.calendarTodayBtn:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+.calendarFooterRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.calendarClearBtn {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #ef4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.calendarClearBtn:hover {
+  background-color: #fef2f2;
+}
+
+.calendarCloseBtn {
+  font-size: 0.88rem;
+  font-weight: 550;
+  color: #64748b;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: color 0.15s ease;
+}
+
+.calendarCloseBtn:hover {
+  color: #0f172a;
 }
 
 .dateClearBtn:hover {
@@ -644,5 +764,11 @@
   }
   .historyCard {
     padding: 1.2rem 1.25rem;
+  }
+  .calendarPopover {
+    width: min(320px, calc(100vw - 2.5rem));
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }

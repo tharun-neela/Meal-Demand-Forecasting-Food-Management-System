@@ -3,67 +3,38 @@
 import { useState, useEffect } from "react";
 import styles from "./notifications.module.css";
 import {
-  type NotificationCategory,
   type NotificationItem,
-  type NotificationTypeMeta,
-  NOTIFICATION_TYPES_SPEC,
   getStoredNotifications,
   saveStoredNotifications,
 } from "./notificationData";
 
-export type { NotificationCategory, NotificationItem, NotificationTypeMeta };
-export { NOTIFICATION_TYPES_SPEC };
+type FilterTab =
+  | "all"
+  | "unread"
+  | "menu"
+  | "timing"
+  | "feedback"
+  | "waste"
+  | "announcement";
 
-export function NotificationCategoryIcon({ category }: { category: NotificationCategory }) {
-  switch (category) {
-    case "menu":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-          <path d="M7 2v20" />
-          <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
-        </svg>
-      );
-    case "timing":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-      );
-    case "attendance":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-          <polyline points="22 4 12 14.01 9 11.01" />
-        </svg>
-      );
-    case "announcement":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m3 11 18-5v12L3 13v-2z" />
-          <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
-        </svg>
-      );
-    case "feedback":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      );
-    case "waste":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-        </svg>
-      );
-  }
+interface TabItem {
+  id: FilterTab;
+  label: string;
 }
+
+const TABS: TabItem[] = [
+  { id: "all", label: "All" },
+  { id: "unread", label: "Unread" },
+  { id: "menu", label: "Menu" },
+  { id: "timing", label: "Meal Timings" },
+  { id: "feedback", label: "Feedbacks & Complaints" },
+  { id: "waste", label: "Food Waste" },
+  { id: "announcement", label: "Announcements" },
+];
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<FilterTab>("all");
 
   // Sync notifications from shared storage on mount and storage events
   useEffect(() => {
@@ -81,10 +52,10 @@ export default function NotificationsPage() {
     };
   }, []);
 
-  // Reset category filter to "all" when sidebar / nav Notifications link is clicked
+  // Reset tab to "all" when sidebar / nav Notifications link is clicked
   useEffect(() => {
     const handleResetCategory = () => {
-      setActiveFilter("all");
+      setActiveTab("all");
     };
 
     window.addEventListener("resetNotificationsCategory", handleResetCategory);
@@ -93,159 +64,152 @@ export default function NotificationsPage() {
     };
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  // Calculate notification count per tab
+  const getTabCount = (tabId: FilterTab): number => {
+    switch (tabId) {
+      case "all":
+        return notifications.length;
+      case "unread":
+        return notifications.filter((n) => !n.isRead).length;
+      case "menu":
+        return notifications.filter((n) => n.category === "menu").length;
+      case "timing":
+        return notifications.filter((n) => n.category === "timing").length;
+      case "feedback":
+        return notifications.filter((n) => n.category === "feedback").length;
+      case "waste":
+        return notifications.filter((n) => n.category === "waste").length;
+      case "announcement":
+        return notifications.filter(
+          (n) => n.category === "announcement" || n.category === "attendance"
+        ).length;
+    }
+  };
 
-  const markAsRead = (id: string) => {
-    const next = notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+  // Mark notification as read (never mark back as unread on click)
+  const handleMarkAsRead = (id: string) => {
+    const target = notifications.find((n) => n.id === id);
+    if (!target || target.isRead) return; // Do not mark unread if already read!
+
+    const next = notifications.map((n) => {
+      if (n.id === id) {
+        return { ...n, isRead: true };
+      }
+      return n;
+    });
     setNotifications(next);
     saveStoredNotifications(next);
   };
 
-  const filteredNotifications = notifications.filter((item) => {
-    if (activeFilter === "unread") return !item.isRead;
-    if (activeFilter === "menu") return item.category === "menu";
-    if (activeFilter === "timing") return item.category === "timing";
-    if (activeFilter === "attendance") return item.category === "attendance";
-    if (activeFilter === "announcement") return item.category === "announcement";
-    if (activeFilter === "feedback") return item.category === "feedback";
-    if (activeFilter === "waste") return item.category === "waste";
+  const displayedNotifications = notifications.filter((item) => {
+    if (activeTab === "all") return true;
+    if (activeTab === "unread") return !item.isRead;
+    if (activeTab === "menu") return item.category === "menu";
+    if (activeTab === "timing") return item.category === "timing";
+    if (activeTab === "feedback") return item.category === "feedback";
+    if (activeTab === "waste") return item.category === "waste";
+    if (activeTab === "announcement") {
+      return item.category === "announcement" || item.category === "attendance";
+    }
     return true;
   });
 
   return (
-    <div className={styles.notificationsWrapper}>
-      {/* Full-width Category Tabs spanning 100% of the page length */}
-      <div className={styles.filterTabsRow}>
-        <div className={styles.filterTabs}>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "all" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("all")}
-          >
-            All ({notifications.length})
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "unread" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("unread")}
-          >
-            Unread ({unreadCount})
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "menu" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("menu")}
-          >
-            Menu
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "timing" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("timing")}
-          >
-            Meal Timings
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "attendance" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("attendance")}
-          >
-            Attendance
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "announcement" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("announcement")}
-          >
-            Announcements
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "feedback" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("feedback")}
-          >
-            Feedback &amp; Complaints
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${activeFilter === "waste" ? styles.filterTabActive : ""}`}
-            onClick={() => setActiveFilter("waste")}
-          >
-            Food Waste
-          </button>
-        </div>
-      </div>
-
-      {/* Notifications Feed */}
-      <div className={styles.notificationsList}>
-        {filteredNotifications.length === 0 ? (
-          <div className={styles.emptyState}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-            </svg>
-            <p className={styles.emptyStateTitle}>No notifications found</p>
-            <p className={styles.emptyStateText}>You have no notifications under this category right now.</p>
-          </div>
-        ) : (
-          filteredNotifications.map((item) => {
-            const specMeta = NOTIFICATION_TYPES_SPEC.find((s) => s.category === item.category);
+    <div className={styles.notificationsContainer}>
+      <div className={styles.notificationsCard}>
+        {/* Top Tab Bar with counts: All | Unread | Menu | Meal Timings | Feedbacks & Complaints | Food Waste | Announcements */}
+        <div className={styles.tabRow} role="tablist">
+          {TABS.map((tab) => {
+            const count = getTabCount(tab.id);
+            const isActive = activeTab === tab.id;
 
             return (
-              <article
+              <button
+                key={tab.id}
+                type="button"
+                className={`${styles.tabButton} ${isActive ? styles.tabButtonActive : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+                aria-selected={isActive}
+                role="tab"
+              >
+                <span
+                  className={`${styles.tabBadge} ${
+                    isActive ? styles.tabBadgeActive : styles.tabBadgeMuted
+                  }`}
+                >
+                  {count}
+                </span>
+                <span
+                  className={`${styles.tabText} ${
+                    isActive ? styles.tabTextActive : styles.tabTextMuted
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Notifications List matching reference UI */}
+        <div className={styles.notificationsList}>
+          {displayedNotifications.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p className={styles.emptyStateTitle}>No notifications found</p>
+              <p className={styles.emptyStateText}>
+                {activeTab === "unread"
+                  ? "You\u2019re all caught up! All notifications have been read."
+                  : `There are no notifications in ${
+                      TABS.find((t) => t.id === activeTab)?.label || "this category"
+                    } right now.`}
+              </p>
+            </div>
+          ) : (
+            displayedNotifications.map((item) => (
+              <div
                 key={item.id}
-                className={`${styles.notificationCard} ${!item.isRead ? styles.notificationCardUnread : styles.notificationCardRead}`}
+                className={`${styles.notificationRow} ${
+                  !item.isRead ? styles.rowUnread : styles.rowRead
+                }`}
                 onClick={() => {
                   if (!item.isRead) {
-                    markAsRead(item.id);
+                    handleMarkAsRead(item.id);
                   }
                 }}
+                onKeyDown={(e) => {
+                  if (!item.isRead && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    handleMarkAsRead(item.id);
+                  }
+                }}
+                role={!item.isRead ? "button" : undefined}
+                tabIndex={!item.isRead ? 0 : undefined}
                 title={!item.isRead ? "Click to mark as read" : undefined}
               >
-                <div
-                  className={`${styles.cardIconCol} ${styles["icon_" + item.category]}`}
-                  style={{
-                    backgroundColor: specMeta?.iconBg,
-                    borderColor: specMeta?.iconBorder,
-                    color: specMeta?.iconColor,
-                  }}
-                >
-                  <NotificationCategoryIcon category={item.category} />
+                <div className={styles.dotCol}>
+                  <span
+                    className={`${styles.statusDot} ${
+                      !item.isRead ? styles.dotUnread : styles.dotRead
+                    }`}
+                  />
                 </div>
 
-                <div className={styles.cardContent}>
-                  <div className={styles.cardTopRow}>
-                    <div className={styles.cardTitleCluster}>
-                      <h3 className={styles.cardTitle}>{item.title}</h3>
-                      {!item.isRead && <span className={styles.unreadDot} title="Unread notification" />}
-                    </div>
-                    <span className={styles.cardTime}>{item.time}</span>
-                  </div>
-
-                  <p className={styles.cardBody}>{item.body}</p>
-
-                  <div className={styles.cardFooter}>
-                    <span className={`${styles.categoryTag} ${styles["tag_" + item.category]}`}>
-                      {specMeta ? specMeta.name : item.category}
-                    </span>
-                    {!item.isRead ? (
-                      <span className={styles.readToggleHint}>
-                        Mark as read
-                      </span>
-                    ) : (
-                      <span className={styles.readStatusBadge}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        Read
-                      </span>
-                    )}
-                  </div>
+                <div className={styles.messageCol}>
+                  <p className={styles.messageText}>
+                    {item.title ? (
+                      <span className={styles.messageTitle}>{item.title} </span>
+                    ) : null}
+                    {item.body}
+                  </p>
                 </div>
-              </article>
-            );
-          })
-        )}
+
+                <div className={styles.timeCol}>
+                  <span className={styles.timeText}>{item.time}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

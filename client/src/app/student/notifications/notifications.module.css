@@ -1,294 +1,264 @@
 /* ============================================================
-   STUDENT NOTIFICATIONS & MESS ALERTS STYLES
-   Implementing 6 Official Notification Channels
+   STUDENT NOTIFICATIONS - STREAMLINED MODERN UI
+   Matching reference specification:
+   - "20 All" and "10 Unread" tabs with red underline
+   - Clean horizontal rows with green/gray status dots
+   - Alternating unread tint (#f1f3f5) and read white (#ffffff)
    ============================================================ */
 
-.notificationsWrapper {
+.notificationsContainer {
   width: 100%;
-  max-width: 100%;
   min-height: calc(100vh - 82px);
   background-color: #ffffff;
-  padding: 2.25rem 2.75rem;
+  padding: 1.75rem 2rem 3rem 2rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+}
+
+.notificationsCard {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ============================================================
-   FILTER TABS FOR 6 NOTIFICATION CHANNELS (FULL-WIDTH SPAN)
+   TOP TAB ROW: [20] All  |  [10] Unread
    ============================================================ */
 
-.filterTabsRow {
-  width: 100%;
-  padding-bottom: 1.25rem;
-  border-bottom: 1.5px solid #e2e8f0;
-}
-
-.filterTabs {
+.tabRow {
   display: flex;
-  width: 100%;
-  align-items: stretch;
-  gap: 0.65rem;
-  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.75rem;
+  border-bottom: 2px solid #edf2f7;
+  position: relative;
+  margin-bottom: 1.25rem;
+  padding-left: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.filterTab {
-  flex: 1 1 auto;
-  min-width: 0;
+.tabRow::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.35rem 0.85rem 0.35rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  position: relative;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.tabButton:hover .tabText {
+  color: #0f172a;
+}
+
+.tabButton:hover:not(.tabButtonActive) {
+  border-bottom-color: #fed7aa;
+}
+
+/* Active orange bottom underline directly below the active category */
+.tabButtonActive {
+  border-bottom: 3px solid #f36f21 !important;
+}
+
+.tabBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  white-space: nowrap;
-  padding: 0.72rem 1.05rem;
-  border-radius: 10px;
-  background-color: #f8fafc;
-  border: 1.5px solid #cbd5e1;
-  font-size: 0.96rem;
-  font-weight: 650;
-  color: #334155;
-  cursor: pointer;
+  min-width: 24px;
+  height: 19px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
   transition: all 0.15s ease;
-  user-select: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
-.filterTab:hover {
+.tabBadgeActive {
+  background-color: #f36f21;
+  color: #ffffff;
+}
+
+.tabBadgeMuted {
   background-color: #f1f5f9;
-  border-color: #94a3b8;
+  color: #64748b;
+}
+
+.tabText {
+  font-size: 0.94rem;
+  transition: all 0.15s ease;
+}
+
+.tabTextActive {
+  font-weight: 650;
   color: #0f172a;
-  transform: translateY(-1px);
 }
 
-.filterTabActive {
-  background-color: #f36f21 !important;
-  border-color: #ea580c !important;
-  color: #ffffff !important;
-  box-shadow: 0 3px 10px rgba(243, 111, 33, 0.28);
+.tabTextMuted {
+  font-weight: 500;
+  color: #64748b;
 }
-
-
 
 /* ============================================================
-   NOTIFICATIONS FEED CARDS
+   NOTIFICATIONS LIST ROWS
    ============================================================ */
 
 .notificationsList {
   display: flex;
   flex-direction: column;
-  gap: 0.95rem;
+  gap: 8px;
   width: 100%;
 }
 
-.notificationCard {
+.notificationRow {
   display: flex;
-  align-items: flex-start;
-  gap: 1.25rem;
-  padding: 1.25rem 1.45rem;
-  background-color: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 14px;
-  transition: all 0.18s ease;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.35rem;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  user-select: none;
+  box-sizing: border-box;
 }
 
-.notificationCard:hover {
-  border-color: #94a3b8;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-  transform: translateY(-1px);
-}
-
-.notificationCardUnread {
-  background-color: #fffdfa;
-  border-color: rgba(243, 111, 33, 0.4);
-  box-shadow: 0 4px 14px rgba(243, 111, 33, 0.08);
+/* Unread: Soft Light Gray Background (#f1f3f5) - clickable to mark read */
+.rowUnread {
+  background-color: #f1f3f5;
   cursor: pointer;
 }
 
-.notificationCardRead {
+.rowUnread:hover {
+  background-color: #e8ebef;
+}
+
+/* Read: Clean White Background (#ffffff) - cannot mark back as unread */
+.rowRead {
+  background-color: #ffffff;
   cursor: default;
 }
 
-.cardIconCol {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  border: 1.5px solid;
+.rowRead:hover {
+  background-color: #ffffff;
+}
+
+/* Status Indicator Dot */
+.dotCol {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  margin-right: 1.15rem;
 }
 
-.cardContent {
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Unread: Vibrant Green Dot */
+.dotUnread {
+  background-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+/* Read: Soft Gray Dot */
+.dotRead {
+  background-color: #d1d5db;
+}
+
+/* Message Column */
+.messageCol {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  padding-right: 1.25rem;
 }
 
-.cardTopRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.cardTitleCluster {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-}
-
-.cardTitle {
-  font-size: 1.14rem;
-  font-weight: 750;
-  color: #0f172a;
+.messageText {
   margin: 0;
-  letter-spacing: -0.015em;
+  font-size: 0.92rem;
+  line-height: 1.48;
+  color: #1f2937;
+  word-break: break-word;
 }
 
-.unreadDot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background-color: #f36f21;
-  box-shadow: 0 0 6px rgba(243, 111, 33, 0.7);
-  display: inline-block;
+.messageTitle {
+  font-weight: 550;
+  color: #111827;
+}
+
+/* Time Column */
+.timeCol {
   flex-shrink: 0;
+  text-align: right;
+  margin-left: 1.25rem;
 }
 
-.cardTime {
-  font-size: 0.88rem;
-  font-weight: 500;
+.timeText {
+  font-size: 0.84rem;
   color: #64748b;
   white-space: nowrap;
 }
 
-.cardBody {
-  font-size: 1.02rem;
-  color: #475569;
-  line-height: 1.55;
-  margin: 0;
-}
-
-.cardFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 0.35rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid #f1f5f9;
-}
-
-.categoryTag {
-  font-size: 0.84rem;
-  font-weight: 700;
-  padding: 0.28rem 0.75rem;
-  border-radius: 7px;
-  letter-spacing: 0.01em;
-}
-
-.tag_menu {
-  background-color: #fff7ed;
-  color: #ea580c;
-  border: 1px solid #fed7aa;
-}
-
-.tag_timing {
-  background-color: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-}
-
-.tag_attendance {
-  background-color: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
-}
-
-.tag_announcement {
-  background-color: #faf5ff;
-  color: #9333ea;
-  border: 1px solid #e9d5ff;
-}
-
-.tag_feedback {
-  background-color: #fefce8;
-  color: #d97706;
-  border: 1px solid #fef08a;
-}
-
-.tag_waste {
-  background-color: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
-}
-
-.readToggleHint {
-  font-size: 0.85rem;
-  font-weight: 650;
-  color: #ea580c;
-  display: inline-flex;
-  align-items: center;
-  user-select: none;
-  transition: color 0.15s ease;
-}
-
-.notificationCardUnread:hover .readToggleHint {
-  color: #c2410c;
-  text-decoration: underline;
-}
-
-.readStatusBadge {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #94a3b8;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  user-select: none;
-}
-
+/* Empty State */
 .emptyState {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 4.5rem 1rem;
-  color: #94a3b8;
-  gap: 0.85rem;
   text-align: center;
+  gap: 0.65rem;
 }
 
 .emptyStateTitle {
-  font-size: 1.25rem;
-  font-weight: 750;
-  color: #475569;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #334155;
   margin: 0;
 }
 
 .emptyStateText {
-  font-size: 1.02rem;
+  font-size: 0.92rem;
   color: #94a3b8;
   margin: 0;
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .notificationsWrapper {
-    padding: 1.5rem 1rem;
+  .notificationsContainer {
+    padding: 1.25rem 1rem 2.5rem 1rem;
   }
 
-  .specGrid {
-    grid-template-columns: 1fr;
+  .notificationRow {
+    padding: 0.85rem 1rem;
+    align-items: flex-start;
   }
 
-  .notificationsHeader {
-    flex-direction: column;
+  .dotCol {
+    margin-top: 0.35rem;
+    margin-right: 0.85rem;
+  }
+
+  .timeCol {
+    margin-left: 0.75rem;
   }
 }

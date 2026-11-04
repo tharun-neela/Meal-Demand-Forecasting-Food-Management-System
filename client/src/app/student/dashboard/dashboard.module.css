@@ -743,9 +743,16 @@
 }
 
 /* ============================================================
-   RECENT MEAL HISTORY CARD (REFERENCE UI REPLICA)
-   Matches the uploaded figure with status icon circles and dashed borders
+   BOTTOM CARDS ROW: RECENT MEAL HISTORY & SUGGEST A DISH
+   Side-by-side flex layout matching reference UI figure
    ============================================================ */
+
+.bottomCardsRow {
+  display: flex;
+  align-items: stretch;
+  gap: 1.5rem;
+  width: 100%;
+}
 
 .recentHistoryCard {
   background-color: #ffffff;
@@ -754,8 +761,9 @@
   padding: 1.25rem 1.45rem;
   box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
   box-sizing: border-box;
-  width: 100%;
-  max-width: 395px;
+  flex: 1;
+  min-width: 0;
+  width: auto;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -864,6 +872,259 @@
   font-size: 0.8rem;
   font-weight: 500;
   color: #64748b;
+}
+
+/* ============================================================
+   SUGGEST A DISH CARD (REFERENCE UI REPLICA)
+   Clean form card with orange submit button
+   ============================================================ */
+
+.suggestDishCard {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.25rem 1.45rem;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: heroFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.suggestDishCard:hover {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.07);
+}
+
+.suggestHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.suggestHeaderMeta {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestTitle {
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.suggestSubtitle {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0.2rem 0 0 0;
+  line-height: 1.35;
+}
+
+.suggestIllustrationWrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suggestIllustration {
+  display: block;
+  overflow: visible;
+}
+
+.suggestForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.72rem;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.suggestRow2Col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.suggestFieldGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.32rem;
+}
+
+.suggestSelectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.suggestSelect {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 0.52rem 2rem 0.52rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.suggestSelect:focus {
+  outline: none;
+  border-color: #f36f21;
+  box-shadow: 0 0 0 3px rgba(243, 111, 33, 0.14);
+}
+
+.suggestSelectChevron {
+  position: absolute;
+  right: 0.75rem;
+  pointer-events: none;
+  color: #64748b;
+}
+
+.suggestInput {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 0.52rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #0f172a;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.suggestInput::placeholder {
+  color: #94a3b8;
+}
+
+.suggestInput:focus {
+  outline: none;
+  border-color: #f36f21;
+  box-shadow: 0 0 0 3px rgba(243, 111, 33, 0.14);
+}
+
+.suggestTextarea {
+  width: 100%;
+  min-height: 58px;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 0.52rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #0f172a;
+  font-family: inherit;
+  box-sizing: border-box;
+  resize: vertical;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.suggestTextarea::placeholder {
+  color: #94a3b8;
+}
+
+.suggestTextarea:focus {
+  outline: none;
+  border-color: #f36f21;
+  box-shadow: 0 0 0 3px rgba(243, 111, 33, 0.14);
+}
+
+.suggestSuccessBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: heroFadeUp 0.3s ease both;
+}
+
+.suggestFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  padding-top: 0.15rem;
+}
+
+.suggestNote {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.suggestActions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.suggestSubmitBtn {
+  background-color: #f36f21;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.48rem 1.3rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(243, 111, 33, 0.22);
+}
+
+.suggestSubmitBtn:hover {
+  background-color: #ea580c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(243, 111, 33, 0.32);
+}
+
+.suggestSubmitBtn:active {
+  transform: translateY(0);
+}
+
+.suggestCancelBtn {
+  background: transparent;
+  color: #64748b;
+  border: none;
+  border-radius: 8px;
+  padding: 0.48rem 0.65rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.suggestCancelBtn:hover {
+  color: #0f172a;
 }
 
 /* ============================================================
@@ -1334,6 +1595,12 @@
   }
 }
 
+@media (max-width: 900px) {
+  .bottomCardsRow {
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 860px) {
   .todayMenuCard {
     max-width: 100%;
@@ -1369,6 +1636,9 @@
 @media (max-width: 580px) {
   .dishCardsGrid3,
   .dishCardsGrid2 {
+    grid-template-columns: 1fr;
+  }
+  .suggestRow2Col {
     grid-template-columns: 1fr;
   }
   .todayMenuHeading {

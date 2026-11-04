@@ -220,6 +220,50 @@ export default function StudentDashboardPage() {
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Suggest a Dish form state
+  const [suggestMealType, setSuggestMealType] = useState<string>("");
+  const [suggestMess, setSuggestMess] = useState<string>("");
+  const [suggestDishName, setSuggestDishName] = useState<string>("");
+  const [suggestReason, setSuggestReason] = useState<string>("");
+  const [suggestSubmitted, setSuggestSubmitted] = useState<boolean>(false);
+
+  const handleSuggestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!suggestDishName.trim()) return;
+
+    try {
+      const existing = JSON.parse(localStorage.getItem("student_dish_suggestions") || "[]");
+      const newEntry = {
+        id: Date.now().toString(),
+        mealType: suggestMealType || "General",
+        mess: suggestMess || "Central Mess",
+        dishName: suggestDishName.trim(),
+        reason: suggestReason.trim(),
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem("student_dish_suggestions", JSON.stringify([newEntry, ...existing]));
+    } catch {
+      // ignore storage error
+    }
+
+    setSuggestSubmitted(true);
+    setSuggestMealType("");
+    setSuggestMess("");
+    setSuggestDishName("");
+    setSuggestReason("");
+
+    setTimeout(() => {
+      setSuggestSubmitted(false);
+    }, 3500);
+  };
+
+  const handleSuggestCancel = () => {
+    setSuggestMealType("");
+    setSuggestMess("");
+    setSuggestDishName("");
+    setSuggestReason("");
+  };
+
   // Hovered tooltip state for the heatmap
   const [hoveredCell, setHoveredCell] = useState<{
     dateStr: string;
@@ -1000,86 +1044,318 @@ export default function StudentDashboardPage() {
             </section>
           )}
 
-          {/* Recent Meal History Card (Faithfully replicating the reference UI figure) */}
-          <section className={styles.recentHistoryCard} aria-label="Recent Meal History">
-          <div className={styles.recentHistoryHeader}>
-            <h3 className={styles.recentHistoryTitle}>Recent Meal History</h3>
-            <Link href="/student/history" className={styles.recentHistoryViewAll}>
-              View All
-            </Link>
-          </div>
+          {/* Bottom Cards Row: Recent Meal History + Suggest a Dish */}
+          <div className={styles.bottomCardsRow}>
+            {/* Recent Meal History Card */}
+            <section className={styles.recentHistoryCard} aria-label="Recent Meal History">
+              <div className={styles.recentHistoryHeader}>
+                <h3 className={styles.recentHistoryTitle}>Recent Meal History</h3>
+                <Link href="/student/history" className={styles.recentHistoryViewAll}>
+                  View All
+                </Link>
+              </div>
 
-          <div className={styles.recentHistoryList}>
-            {recentHistoryList.map((item) => (
-              <div key={item.id} className={styles.recentHistoryItem}>
-                <div
-                  className={`${styles.historyIconCircle} ${
-                    item.type === "approved"
-                      ? styles.iconApproved
-                      : item.type === "rejected"
-                      ? styles.iconRejected
-                      : styles.iconFraud
-                  }`}
-                >
-                  {item.type === "approved" && (
+              <div className={styles.recentHistoryList}>
+                {recentHistoryList.map((item) => (
+                  <div key={item.id} className={styles.recentHistoryItem}>
+                    <div
+                      className={`${styles.historyIconCircle} ${
+                        item.type === "approved"
+                          ? styles.iconApproved
+                          : item.type === "rejected"
+                          ? styles.iconRejected
+                          : styles.iconFraud
+                      }`}
+                    >
+                      {item.type === "approved" && (
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#ffffff"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                      {item.type === "rejected" && (
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#ffffff"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      )}
+                      {item.type === "fraud" && (
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#ffffff"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                          <line x1="12" y1="9" x2="12" y2="13" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                      )}
+                    </div>
+
+                    <div className={styles.historyItemContent}>
+                      <div className={styles.historyItemTitle}>
+                        <span>{item.titlePrefix}</span>
+                        <span className={styles.highlightBlue}>{item.highlightText}</span>
+                        <span>{item.titleSuffix}</span>
+                      </div>
+                      <div className={styles.historyItemDate}>{item.timestamp}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Suggest a Dish Card (Faithfully replicating reference UI with Orange Submit Button) */}
+            <section className={styles.suggestDishCard} aria-label="Suggest a Dish">
+              <div className={styles.suggestHeader}>
+                <div className={styles.suggestHeaderMeta}>
+                  <h3 className={styles.suggestTitle}>Suggest a Dish</h3>
+                  <p className={styles.suggestSubtitle}>Help mess administration improve the menu.</p>
+                </div>
+                <div className={styles.suggestIllustrationWrapper}>
+                  {/* Food bowl vector illustration matching reference design */}
+                  <svg
+                    width="52"
+                    height="52"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={styles.suggestIllustration}
+                    aria-hidden="true"
+                  >
+                    {/* Sparkle top left */}
+                    <path
+                      d="M12 14C12 17 9 19 6 19C9 19 12 21 12 24C12 21 15 19 18 19C15 19 12 17 12 14Z"
+                      fill="#f59e0b"
+                    />
+                    {/* Sparkle tiny right */}
+                    <path
+                      d="M56 12C56 14 54 15 52 15C54 15 56 16 56 18C56 16 58 15 60 15C58 15 56 14 56 12Z"
+                      fill="#f59e0b"
+                      opacity="0.8"
+                    />
+                    {/* Spoon */}
+                    <path
+                      d="M48 10L36 26"
+                      stroke="#94a3b8"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
+                    <ellipse
+                      cx="50"
+                      cy="11"
+                      rx="4.5"
+                      ry="3"
+                      transform="rotate(-40 50 11)"
+                      fill="#cbd5e1"
+                      stroke="#94a3b8"
+                      strokeWidth="1.5"
+                    />
+                    {/* Bowl Shadow */}
+                    <ellipse cx="32" cy="56" rx="22" ry="4" fill="#f1f5f9" />
+                    {/* Food heap inside bowl */}
+                    <ellipse cx="32" cy="30" rx="19" ry="10" fill="#f59e0b" />
+                    {/* Rice / curry layers */}
+                    <path
+                      d="M14 30C14 24 22 21 32 21C42 21 50 24 50 30C50 33 42 36 32 36C22 36 14 33 14 30Z"
+                      fill="#fbbf24"
+                    />
+                    <path
+                      d="M17 31C20 25 26 23 34 23C42 23 47 26 47 31C44 34 38 35 32 35C24 35 19 33 17 31Z"
+                      fill="#f59e0b"
+                    />
+                    {/* Garnishes / green peas */}
+                    <circle cx="27" cy="27" r="2.2" fill="#16a34a" />
+                    <circle cx="35" cy="28" r="2.5" fill="#22c55e" />
+                    <circle cx="31" cy="31" r="2" fill="#15803d" />
+                    <circle cx="41" cy="29" r="1.8" fill="#16a34a" />
+                    {/* Bowl Body */}
+                    <path
+                      d="M12 30C12 43 20 52 32 52C44 52 52 43 52 30H12Z"
+                      fill="#ffffff"
+                      stroke="#334155"
+                      strokeWidth="2.5"
+                      strokeLinejoin="round"
+                    />
+                    {/* Bowl base */}
+                    <path
+                      d="M24 52H40V54C40 55.1 39.1 56 38 56H26C24.9 56 24 55.1 24 54V52Z"
+                      fill="#e2e8f0"
+                      stroke="#334155"
+                      strokeWidth="2"
+                    />
+                    {/* Bowl rim outline */}
+                    <ellipse
+                      cx="32"
+                      cy="30"
+                      rx="20"
+                      ry="6.5"
+                      fill="none"
+                      stroke="#334155"
+                      strokeWidth="2.5"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <form onSubmit={handleSuggestSubmit} className={styles.suggestForm}>
+                <div className={styles.suggestRow2Col}>
+                  <div className={styles.suggestFieldGroup}>
+                    <label className={styles.suggestLabel} htmlFor="suggest-meal-type">
+                      Meal Type
+                    </label>
+                    <div className={styles.suggestSelectWrapper}>
+                      <select
+                        id="suggest-meal-type"
+                        className={styles.suggestSelect}
+                        value={suggestMealType}
+                        onChange={(e) => setSuggestMealType(e.target.value)}
+                      >
+                        <option value="">Select Meal</option>
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Evening Snacks">Evening Snacks</option>
+                        <option value="Dinner">Dinner</option>
+                      </select>
+                      <svg
+                        className={styles.suggestSelectChevron}
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#64748b"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className={styles.suggestFieldGroup}>
+                    <label className={styles.suggestLabel} htmlFor="suggest-mess">
+                      Mess
+                    </label>
+                    <div className={styles.suggestSelectWrapper}>
+                      <select
+                        id="suggest-mess"
+                        className={styles.suggestSelect}
+                        value={suggestMess}
+                        onChange={(e) => setSuggestMess(e.target.value)}
+                      >
+                        <option value="">Select Mess</option>
+                        <option value="BH-01">BH-01</option>
+                        <option value="BH-02">BH-02</option>
+                        <option value="BH-03">BH-03</option>
+                        <option value="Central Mess">Central Mess</option>
+                        <option value="GH-01">GH-01</option>
+                        <option value="GH-02">GH-02</option>
+                      </select>
+                      <svg
+                        className={styles.suggestSelectChevron}
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#64748b"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.suggestFieldGroup}>
+                  <label className={styles.suggestLabel} htmlFor="suggest-dish">
+                    Your Dish Recommendation
+                  </label>
+                  <input
+                    id="suggest-dish"
+                    type="text"
+                    required
+                    className={styles.suggestInput}
+                    placeholder="e.g., Paneer Butter Masala, Biryani"
+                    value={suggestDishName}
+                    onChange={(e) => setSuggestDishName(e.target.value)}
+                  />
+                </div>
+
+                <div className={styles.suggestFieldGroup}>
+                  <label className={styles.suggestLabel} htmlFor="suggest-reason">
+                    Brief reason (optional)
+                  </label>
+                  <textarea
+                    id="suggest-reason"
+                    rows={2}
+                    className={styles.suggestTextarea}
+                    placeholder="Why should we add it?"
+                    value={suggestReason}
+                    onChange={(e) => setSuggestReason(e.target.value)}
+                  />
+                </div>
+
+                {suggestSubmitted && (
+                  <div className={styles.suggestSuccessBanner}>
                     <svg
-                      width="20"
-                      height="20"
+                      width="16"
+                      height="16"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#ffffff"
+                      stroke="#047857"
                       strokeWidth="3"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
-                  )}
-                  {item.type === "rejected" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  )}
-                  {item.type === "fraud" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                      <line x1="12" y1="9" x2="12" y2="13" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
-                  )}
-                </div>
-
-                <div className={styles.historyItemContent}>
-                  <div className={styles.historyItemTitle}>
-                    <span>{item.titlePrefix}</span>
-                    <span className={styles.highlightBlue}>{item.highlightText}</span>
-                    <span>{item.titleSuffix}</span>
+                    <span>Thank you! Your dish recommendation was submitted.</span>
                   </div>
-                  <div className={styles.historyItemDate}>{item.timestamp}</div>
+                )}
+
+                <div className={styles.suggestFooter}>
+                  <span className={styles.suggestNote}>Suggestions are reviewed.</span>
+                  <div className={styles.suggestActions}>
+                    <button type="submit" className={styles.suggestSubmitBtn}>
+                      Submit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSuggestCancel}
+                      className={styles.suggestCancelBtn}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              </form>
+            </section>
           </div>
-        </section>
       </div>
 
       {/* Right Side: Daily Food Wastage Donut Card */}

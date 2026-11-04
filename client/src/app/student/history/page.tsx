@@ -182,6 +182,11 @@ const REFERENCE_HISTORICAL_RECORDS: MealHistoryItem[] = [
 const STORAGE_KEY = "student_meal_attendance_records";
 const PAGE_SIZE = 8;
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 export default function MealHistoryPage() {
   const [liveRecords, setLiveRecords] = useState<MealHistoryItem[]>([]);
   const [selectedMealFilter, setSelectedMealFilter] = useState<string>("all");
@@ -191,8 +196,25 @@ export default function MealHistoryPage() {
   const [isDateOpen, setIsDateOpen] = useState<boolean>(false);
   const [activeReceipt, setActiveReceipt] = useState<MealHistoryItem | null>(null);
 
+  // Calendar popover view state (deterministic SSR defaults)
+  const [calendarViewYear, setCalendarViewYear] = useState<number>(2026);
+  const [calendarViewMonth, setCalendarViewMonth] = useState<number>(10); // 10 = November (0-indexed)
+  const [todayKey, setTodayKey] = useState<string>("2026-11-02");
+
   const filterRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
+
+  // Initialize live client date safely on mount
+  useEffect(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    const key = `${y}-${m}-${d}`;
+    setTodayKey(key);
+    setCalendarViewYear(y);
+    setCalendarViewMonth(now.getMonth());
+  }, []);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -296,8 +318,51 @@ export default function MealHistoryPage() {
     setCurrentPage(1);
   };
 
+  // Calendar days grid computation
+  const calendarDays = useMemo(() => {
+    const firstDayOfWeek = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
+    const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
+    return { firstDayOfWeek, daysInMonth };
+  }, [calendarViewYear, calendarViewMonth]);
+
+  const handlePrevMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (calendarViewMonth === 0) {
+      setCalendarViewMonth(11);
+      setCalendarViewYear((y) => y - 1);
+    } else {
+      setCalendarViewMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (calendarViewMonth === 11) {
+      setCalendarViewMonth(0);
+      setCalendarViewYear((y) => y + 1);
+    } else {
+      setCalendarViewMonth((m) => m + 1);
+    }
+  };
+
+  const handleToggleDatePicker = () => {
+    if (!isDateOpen && selectedDate) {
+      const [y, m] = selectedDate.split("-").map(Number);
+      if (!isNaN(y) && !isNaN(m)) {
+        setCalendarViewYear(y);
+        setCalendarViewMonth(m - 1);
+      }
+    }
+    setIsDateOpen((prev) => !prev);
+  };
+
   const handleDateSelect = (dateStr: string) => {
-    setSelectedDate(dateStr);
+    if (selectedDate === dateStr) {
+      // Toggle off if already selected
+      setSelectedDate("");
+    } else {
+      setSelectedDate(dateStr);
+    }
     setIsDateOpen(false);
     setCurrentPage(1);
   };
@@ -319,7 +384,7 @@ export default function MealHistoryPage() {
               <button
                 type="button"
                 className={`${styles.chooseDateBtn} ${selectedDate ? styles.chooseDateBtnActive : ""}`}
-                onClick={() => setIsDateOpen(!isDateOpen)}
+                onClick={handleToggleDatePicker}
                 aria-expanded={isDateOpen}
                 aria-label="Choose date to filter meal history"
               >
@@ -342,27 +407,101 @@ export default function MealHistoryPage() {
               </button>
 
               {isDateOpen && (
-                <div className={styles.dateDropdown}>
-                  <label className={styles.dateInputLabel} htmlFor="history-date-picker">
-                    Filter by exact date
-                  </label>
-                  <input
-                    id="history-date-picker"
-                    type="date"
-                    className={styles.dateNativeInput}
-                    value={selectedDate}
-                    onChange={(e) => handleDateSelect(e.target.value)}
-                  />
-                  <div className={styles.dateActionRow}>
-                    {selectedDate && (
+                <div className={styles.calendarPopover}>
+                  {/* Calendar Nav Header (< Month Year >) */}
+                  <div className={styles.calendarNavHeader}>
+                    <button
+                      type="button"
+                      className={styles.calendarNavBtn}
+                      onClick={handlePrevMonth}
+                      aria-label="Previous Month"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    </button>
+                    <span className={styles.calendarMonthTitle}>
+                      {MONTH_NAMES[calendarViewMonth]} {calendarViewYear}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.calendarNavBtn}
+                      onClick={handleNextMonth}
+                      aria-label="Next Month"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Weekday Row (SU MO TU WE TH FR SA) */}
+                  <div className={styles.calendarWeekdays}>
+                    <span>SU</span>
+                    <span>MO</span>
+                    <span>TU</span>
+                    <span>WE</span>
+                    <span>TH</span>
+                    <span>FR</span>
+                    <span>SA</span>
+                  </div>
+
+                  {/* Days Grid */}
+                  <div className={styles.calendarDaysGrid}>
+                    {Array.from({ length: calendarDays.firstDayOfWeek }).map((_, i) => (
+                      <div key={`empty-${i}`} className={styles.calendarEmptyCell} />
+                    ))}
+                    {Array.from({ length: calendarDays.daysInMonth }).map((_, i) => {
+                      const dayNum = i + 1;
+                      const dateKey = `${calendarViewYear}-${String(calendarViewMonth + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
+                      const isSelected = dateKey === selectedDate;
+                      const isTodayDate = dateKey === todayKey;
+
+                      return (
+                        <button
+                          key={dateKey}
+                          type="button"
+                          className={`${styles.calendarDayCell} ${
+                            isSelected ? styles.calendarDayCellActive : ""
+                          } ${isTodayDate && !isSelected ? styles.calendarDayCellToday : ""}`}
+                          onClick={() => handleDateSelect(dateKey)}
+                          title={`${dayNum} ${MONTH_NAMES[calendarViewMonth]} ${calendarViewYear}${
+                            isTodayDate ? " (Today)" : ""
+                          }`}
+                        >
+                          {dayNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Footer: Today (YYYY-MM-DD) on the left, Close/Clear on the right */}
+                  <div className={styles.calendarFooter}>
+                    <button
+                      type="button"
+                      className={styles.calendarTodayBtn}
+                      onClick={() => handleDateSelect(todayKey)}
+                    >
+                      Today ({todayKey})
+                    </button>
+                    <div className={styles.calendarFooterRight}>
+                      {selectedDate && (
+                        <button
+                          type="button"
+                          className={styles.calendarClearBtn}
+                          onClick={() => handleDateSelect("")}
+                        >
+                          Clear
+                        </button>
+                      )}
                       <button
                         type="button"
-                        className={styles.dateClearBtn}
-                        onClick={() => handleDateSelect("")}
+                        className={styles.calendarCloseBtn}
+                        onClick={() => setIsDateOpen(false)}
                       >
-                        Clear Date
+                        Close
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               )}
