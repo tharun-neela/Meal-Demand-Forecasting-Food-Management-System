@@ -99,8 +99,67 @@
   color: #1e293b;
   text-align: center;
   line-height: 1.4;
-  margin: 0 0 1.75rem 0;
+  margin: 0 0 1.25rem 0;
   max-width: 320px;
+}
+
+/* Mess Closed Warning Notice Banner */
+.messClosedNoticeBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background-color: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+  box-sizing: border-box;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.messClosedNoticeIcon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.messClosedNoticeContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: left;
+}
+
+.messClosedNoticeTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.messClosedNoticeSubtitle {
+  font-size: 0.75rem;
+  color: #7f1d1d;
+  line-height: 1.35;
+}
+
+.messClosedFloatingBadge {
+  position: absolute;
+  top: 10px;
+  background: rgba(220, 38, 38, 0.88);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Scanner Frame Container */

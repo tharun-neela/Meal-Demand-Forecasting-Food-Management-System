@@ -4,8 +4,8 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protect all student portal routes from unauthorized direct URL access
-  if (pathname.startsWith("/student")) {
+  // Protect student and mess-admin portal routes from unauthorized direct URL access
+  if (pathname.startsWith("/student") || pathname.startsWith("/mess-admin")) {
     const token = request.cookies.get("lpu_mess_jwt")?.value;
 
     if (!token || token === "undefined" || token === "null" || token.trim() === "") {
@@ -21,5 +21,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/student/:path*"],
+  matcher: ["/student/:path*", "/mess-admin/:path*"],
 };

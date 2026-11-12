@@ -177,6 +177,7 @@ export default function AccessMealPage() {
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [isRejected, setIsRejected] = useState<boolean>(false);
   const [rejectedCode, setRejectedCode] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState<"closed" | "unauthorized_qr" | null>(null);
   const [cameraError, setCameraError] = useState<{ title: string; message: string } | null>(null);
   const [scannedResult, setScannedResult] = useState<AttendanceRecord | null>(null);
   const [popupCountdown, setPopupCountdown] = useState<number>(20);
@@ -277,6 +278,7 @@ export default function AccessMealPage() {
     setIsLocked(false);
     setIsRejected(false);
     setRejectedCode(null);
+    setRejectionReason(null);
     setIsScanning(false);
     setIsRequestingPermission(false);
   }, []);
@@ -288,17 +290,50 @@ export default function AccessMealPage() {
     };
   }, [stopCamera]);
 
-  // Handle QR scan with strict validation for BH1M07 only
+  // Handle QR scan with strict validation:
+  // 1. Mess must be currently open (Active service hours)
+  // 2. QR code must match authorized token BH1M07
   const handleScanSuccess = useCallback(
     (codeData: string) => {
       const cleanCode = codeData.trim().toUpperCase();
+      const status = getCurrentMealStatus();
 
-      // STRICT VALIDATION: ONLY approve the meal for the authorized QR code BH1M07
+      // STRICT VALIDATION 1: WHEN MESS IS CLOSED, DO NOT APPROVE ANYONE!
+      if (!status.isOpen) {
+        if (isCooldownRef.current) return;
+        isCooldownRef.current = true;
+
+        setIsRejected(true);
+        setRejectionReason("closed");
+        setRejectedCode(cleanCode);
+        playRejectionTone();
+
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try {
+            navigator.vibrate([180, 80, 180]);
+          } catch {
+            // ignore
+          }
+        }
+
+        // Auto-dismiss rejection overlay after 2.5s and allow scanning again
+        setTimeout(() => {
+          setIsRejected(false);
+          setRejectionReason(null);
+          setRejectedCode(null);
+          isCooldownRef.current = false;
+        }, 2500);
+
+        return;
+      }
+
+      // STRICT VALIDATION 2: ONLY approve the meal for the authorized QR code BH1M07
       if (cleanCode !== AUTHORIZED_QR_CODE) {
         if (isCooldownRef.current) return;
         isCooldownRef.current = true;
 
         setIsRejected(true);
+        setRejectionReason("unauthorized_qr");
         setRejectedCode(cleanCode);
         playRejectionTone();
 
@@ -310,21 +345,23 @@ export default function AccessMealPage() {
           }
         }
 
-        // Auto-dismiss rejection overlay after 1.2s and immediately resume active scanning
+        // Auto-dismiss rejection overlay after 1.5s and immediately resume active scanning
         setTimeout(() => {
           setIsRejected(false);
+          setRejectionReason(null);
           setRejectedCode(null);
           isCooldownRef.current = false;
-        }, 1200);
+        }, 1500);
 
         return;
       }
 
-      // Approved! Authorized BH1M07 QR code detected
+      // Approved! Authorized BH1M07 QR code detected DURING ACTIVE MESS HOURS
       isLockedRef.current = true;
       isScanningActiveRef.current = false;
       setIsLocked(true);
       setIsRejected(false);
+      setRejectionReason(null);
       setRejectedCode(null);
 
       // Instant payment-app chime & haptic feedback
@@ -344,8 +381,7 @@ export default function AccessMealPage() {
 
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const status = getCurrentMealStatus();
-      const mealName = status.activeMeal?.name || status.nextMeal?.name || "Dinner";
+      const mealName = status.activeMeal?.name || "Dinner";
 
       const newRecord: AttendanceRecord = {
         id: `att-${Date.now()}`,
@@ -593,6 +629,37 @@ export default function AccessMealPage() {
           Scan the QR code to Access your meal
         </h2>
 
+        {/* Mess Closed Context Banner: Proactively alerts that mess is closed */}
+        {!mealStatus.isOpen && (
+          <div className={styles.messClosedNoticeBanner}>
+            <div className={styles.messClosedNoticeIcon}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#dc2626"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div className={styles.messClosedNoticeContent}>
+              <span className={styles.messClosedNoticeTitle}>Mess is Currently Closed</span>
+              <span className={styles.messClosedNoticeSubtitle}>
+                Attendance cannot be approved outside active meal timings.
+                {mealStatus.nextMeal && (
+                  <> Next: <strong>{mealStatus.nextMeal.name}</strong> ({mealStatus.nextMeal.timing})</>
+                )}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Viewfinder Outer with 4 Corner Brackets (Green for Approved, Red for Rejected) */}
         <div
           className={`${styles.viewfinderOuter} ${
@@ -608,6 +675,13 @@ export default function AccessMealPage() {
 
           {/* Viewfinder Inner Display */}
           <div className={styles.viewfinderInner}>
+            {/* Live indicator if scanning while mess is closed */}
+            {isScanning && !mealStatus.isOpen && !isRejected && (
+              <div className={styles.messClosedFloatingBadge}>
+                <span>Mess Closed • Will Not Approve</span>
+              </div>
+            )}
+
             {/* 1. Requesting Permission Loading State */}
             {isRequestingPermission && (
               <div className={styles.loadingView}>
@@ -636,21 +710,62 @@ export default function AccessMealPage() {
               </>
             )}
 
-            {/* 3. Rejection Notice when an unauthorized QR is scanned */}
-            {isRejected && rejectedCode && (
+            {/* 3. Rejection Notice when scan is not approved */}
+            {isRejected && (
               <div className={styles.invalidScanOverlay}>
                 <div className={styles.invalidScanIcon}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="15" y1="9" x2="9" y2="15" />
-                    <line x1="9" y1="9" x2="15" y2="15" />
-                  </svg>
+                  {rejectionReason === "closed" ? (
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                  )}
                 </div>
-                <div className={styles.invalidScanTitle}>Access Denied</div>
+                <div className={styles.invalidScanTitle}>
+                  {rejectionReason === "closed" ? "Mess is Closed" : "Access Denied"}
+                </div>
                 <div className={styles.invalidScanText}>
-                  Unauthorized QR code. Meal attendance is only approved for the official BH1M07 mess QR.
+                  {rejectionReason === "closed" ? (
+                    <>
+                      Meal service is currently closed. Attendance cannot be approved outside active mess hours.
+                      {mealStatus.nextMeal && (
+                        <span style={{ display: "block", marginTop: "0.35rem", color: "#fca5a5", fontWeight: 600 }}>
+                          Next: {mealStatus.nextMeal.name} ({mealStatus.nextMeal.timing})
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    "Unauthorized QR code. Meal attendance is only approved for the official BH1M07 mess QR."
+                  )}
                 </div>
-                <span className={styles.invalidScanBadge}>Scanned: {rejectedCode}</span>
+                <span className={styles.invalidScanBadge}>
+                  {rejectionReason === "closed" ? "Status: Not Approved (Mess Closed)" : `Scanned: ${rejectedCode}`}
+                </span>
               </div>
             )}
 

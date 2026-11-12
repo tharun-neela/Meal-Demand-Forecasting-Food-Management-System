@@ -1,6 +1,6 @@
-import styles from "../student.module.css";
+import styles from "../messAdmin.module.css";
 
-export default function ComplaintsPage() {
+export default function FeedbackPage() {
   return (
     <div className={styles.blankPageWrapper}>
       <div className={styles.blankCanvas} />

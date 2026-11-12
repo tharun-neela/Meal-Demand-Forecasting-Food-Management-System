@@ -158,6 +158,11 @@ export default function LoginPage() {
         return;
       }
 
+      if (data.user.role === "Mess Administrator") {
+        router.push("/mess-admin/dashboard");
+        return;
+      }
+
       setLoggedInUser({
         userId: data.user.userId,
         name: data.user.name,

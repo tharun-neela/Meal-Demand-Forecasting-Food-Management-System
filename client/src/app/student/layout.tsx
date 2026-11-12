@@ -108,17 +108,6 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    label: "Raise Complaints",
-    href: "/student/complaints",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-    ),
-  },
-  {
     label: "Change Mess",
     href: "/student/change-mess",
     icon: (
@@ -140,16 +129,6 @@ const NAV_ITEMS: NavItem[] = [
       </svg>
     ),
   },
-  {
-    label: "Settings",
-    href: "/student/settings",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-      </svg>
-    ),
-  },
 ];
 
 interface SearchOption {
@@ -167,10 +146,8 @@ const SEARCH_OPTIONS: SearchOption[] = [
   { title: "Student Dashboard", category: "Overview", href: "/student/dashboard", keywords: ["home", "overview", "summary", "main"] },
   { title: "Notifications", category: "Alerts", href: "/student/notifications", keywords: ["alerts", "updates", "announcements", "bell"] },
   { title: "Mess Feedback", category: "Support", href: "/student/feedback", keywords: ["rating", "review", "taste", "hygiene"] },
-  { title: "Raise Complaints", category: "Support", href: "/student/complaints", keywords: ["issue", "report", "grievance", "problem", "ticket"] },
   { title: "Change Mess", category: "Services", href: "/student/change-mess", keywords: ["switch", "transfer", "hostel", "mess change"] },
   { title: "Student Profile", category: "Account", href: "/student/profile", keywords: ["user", "account", "details", "registration", "tharun"] },
-  { title: "Settings", category: "Account", href: "/student/settings", keywords: ["preferences", "password", "theme", "config"] },
 ];
 
 
@@ -184,10 +161,8 @@ const PAGE_TITLES: Record<string, string> = {
   "/student/analytics": "Meal Analytics",
   "/student/notifications": "Notifications",
   "/student/feedback": "Feedback",
-  "/student/complaints": "Raise Complaints",
   "/student/change-mess": "Change Mess",
   "/student/profile": "Profile",
-  "/student/settings": "Settings",
 };
 
 interface SearchItemResult {
@@ -846,18 +821,6 @@ export default function StudentLayout({
                           <circle cx="12" cy="7" r="4" />
                         </svg>
                         <span>Student Profile</span>
-                      </Link>
-
-                      <Link
-                        href="/student/settings"
-                        onClick={() => setIsProfileOpen(false)}
-                        className={styles.profileDropdownLink}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="3" />
-                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                        </svg>
-                        <span>Settings</span>
                       </Link>
 
                       <Link

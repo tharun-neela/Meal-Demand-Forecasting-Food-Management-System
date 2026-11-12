@@ -570,7 +570,11 @@ export default function StudentDashboardPage() {
 
         if (!isOutOfBounds && !isFuture) {
           const matchingRecords = records.filter((r) => {
-            return r.dateKey === dateKey || (isToday && r.timestamp && r.timestamp.toLowerCase().includes("today"));
+            return (
+              (r.dateKey === dateKey ||
+                (isToday && r.timestamp && r.timestamp.toLowerCase().includes("today"))) &&
+              r.verified !== false
+            );
           });
 
           if (matchingRecords.length > 0) {
