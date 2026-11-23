@@ -524,6 +524,7 @@ export default function StudentLayout({
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 onClick={() => {
                   setIsMobileDrawerOpen(false);
                   if (item.href === "/student/notifications" && typeof window !== "undefined") {

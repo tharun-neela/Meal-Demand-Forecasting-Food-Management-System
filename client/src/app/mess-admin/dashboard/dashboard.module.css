@@ -1,0 +1,794 @@
+.dashboardContainer {
+  width: 100%;
+  min-height: calc(100vh - 82px);
+  background-color: #ffffff;
+  padding: 2.25rem 2.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.greetingPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: #d5eefd;
+  color: #285777;
+  padding: 0.8rem 1.75rem;
+  border-radius: 18px;
+  font-size: 2.15rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  width: fit-content;
+  box-shadow: 0 2px 10px rgba(40, 87, 119, 0.09);
+  user-select: none;
+  line-height: 1.25;
+}
+
+.greetingText {
+  color: #285777;
+  font-weight: 600;
+}
+
+.wavingHand {
+  display: inline-block;
+  font-size: 2.05rem;
+  line-height: 1;
+  transform-origin: 70% 70%;
+  animation: waveAnimation 2s infinite ease-in-out;
+}
+
+@keyframes waveAnimation {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* 3 KPI Cards Grid */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.kpiCard {
+  background-color: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 18px;
+  padding: 1.4rem 1.6rem;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 142px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  user-select: none;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px -4px rgba(15, 23, 42, 0.08);
+  border-color: #cbd5e1;
+}
+
+.kpiTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.kpiIconWrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpiIconBlue {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.kpiIconPurple {
+  background-color: #f5f3ff;
+  color: #9333ea;
+}
+
+.kpiIconGreen {
+  background-color: #ecfdf5;
+  color: #10b981;
+}
+
+.kpiSubBadge {
+  font-size: 0.78rem;
+  font-weight: 450;
+  color: #94a3b8;
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+}
+
+.kpiBottom {
+  margin-top: 1.15rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.kpiValue {
+  font-size: 2.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.kpiLabel {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 0.45rem;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 1024px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   MAIN CONTENT 2-COLUMN ROW (Today's Menu Left + Food Wastage Right)
+   ============================================================ */
+
+.mainContentRow {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.leftColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rightColumn {
+  width: 350px;
+  max-width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 1100px) {
+  .mainContentRow {
+    flex-direction: column;
+  }
+  .rightColumn {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   TODAY'S MENU CARD (Left Column)
+   Faithfully matching student portal reference UI
+   ============================================================ */
+
+.todayMenuCard {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.35rem 1.6rem;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: heroFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.todayMenuCard:hover {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.07);
+}
+
+.todayMenuHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.todayMenuMeta {
+  display: flex;
+  flex-direction: column;
+}
+
+.todayMenuSub {
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ea580c;
+}
+
+.todayMenuHeading {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0.1rem 0 0.05rem 0;
+  line-height: 1.2;
+}
+
+.todayMenuTiming {
+  font-size: 0.78rem;
+  font-weight: 550;
+  color: #64748b;
+}
+
+/* Mess Status Live Badges */
+.messOpenBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1.5px solid #a7f3d0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
+}
+
+.pulseDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #10b981;
+  position: relative;
+  display: inline-block;
+  animation: liveDotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes liveDotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+  }
+}
+
+.messClosedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #f8fafc;
+  color: #64748b;
+  border: 1.5px solid #e2e8f0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.menuDivider {
+  width: 100%;
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 0.85rem 0 0.95rem 0;
+}
+
+/* Sections & Dish Cards */
+.menuSectionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.dishCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .dishCardsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dishCard {
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  min-height: 52px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.dishCard:hover {
+  background-color: #ffffff;
+  border-color: #fed7aa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px -2px rgba(243, 111, 33, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+}
+
+.dishCardTop {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
+}
+
+.dishCategoryPill {
+  font-size: 0.6rem;
+  font-weight: 650;
+  color: #64748b;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 0.08rem 0.38rem;
+  border-radius: 9999px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  transition: all 0.15s ease;
+}
+
+.dishCard:hover .dishCategoryPill {
+  background-color: #fff7ed;
+  color: #ea580c;
+  border-color: #fed7aa;
+}
+
+.dishCardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.dishCardTitle {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Skeletons */
+.skeletonTitle {
+  width: 160px;
+  height: 28px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  margin: 0.25rem 0;
+}
+
+.skeletonTiming {
+  width: 120px;
+  height: 14px;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+}
+
+.skeletonBadge {
+  width: 100px;
+  height: 28px;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+}
+
+.skeletonCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.skeletonDish {
+  height: 52px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+}
+
+/* ============================================================
+   FOOD WASTAGE DONUT CARD (Right Column)
+   ============================================================ */
+
+.wastageCard {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.35rem 1.35rem 1.45rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: heroFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  width: 100%;
+}
+
+.wastageCard:hover {
+  box-shadow: 0 8px 22px -3px rgba(15, 23, 42, 0.07);
+}
+
+.wastageHeaderGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.95rem;
+  text-align: center;
+}
+
+.wastageCardTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.wastageScopeBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  background-color: #f1f5f9;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+}
+
+/* Donut Chart Container */
+.chartContainer {
+  position: relative;
+  width: 185px;
+  height: 185px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.donutSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.03));
+  animation: donutRotateSweep 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+
+@keyframes donutRotateSweep {
+  0% {
+    transform: rotate(-100deg) scale(0.85);
+    opacity: 0.2;
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.donutSegment {
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.donutSegment:hover {
+  opacity: 0.92;
+}
+
+.chartCenterOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.centerNumber {
+  font-size: 1.95rem;
+  font-weight: 750;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.centerUnit {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Context Text Below Chart */
+.subtitleNote {
+  font-size: 0.8rem;
+  font-weight: 550;
+  color: #475569;
+  text-align: center;
+  margin: 0.95rem 0 0.85rem 0;
+  line-height: 1.4;
+}
+
+/* More Information Button / Link */
+.moreInfoBtn {
+  width: 100%;
+  padding: 0.62rem 0.95rem;
+  border-radius: 11px;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  margin-bottom: 1.05rem;
+  font-family: inherit;
+  display: block;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.moreInfoBtn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  color: #ea580c;
+}
+
+.moreInfoBtn:active {
+  transform: translateY(0);
+}
+
+/* Legend List at the bottom */
+.legendList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  padding: 0.1rem 0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.12s ease;
+}
+
+.legendItem:hover {
+  background-color: #f8fafc;
+}
+
+.legendLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.legendDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-weight: 600;
+  color: #334155;
+}
+
+.legendRight {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.legendKg {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.legendPercent {
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 30px;
+  text-align: right;
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   MESS CAPACITY & ENROLLMENT BAR CHART CARD (Below Today's Menu)
+   ============================================================ */
+
+.capacityCard {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.4rem 1.6rem;
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.capacityCard:hover {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.07);
+}
+
+.capacityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+  flex-wrap: wrap;
+}
+
+.capacityTitle {
+  font-size: 1.32rem;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.capacityLegendGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.capacityLegendBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f1f5f9;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  user-select: none;
+}
+
+.legendOrangePill {
+  width: 22px;
+  height: 10px;
+  border-radius: 9999px;
+  background-color: #f36f21;
+}
+
+.legendGrayPill {
+  width: 22px;
+  height: 10px;
+  border-radius: 9999px;
+  background-color: #dbe2ea;
+}
+
+.legendBadgeText {
+  font-size: 0.82rem;
+  font-weight: 550;
+  color: #1e293b;
+}
+
+.capacityChartWrapper {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+}
+
+.capacitySvg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  display: block;
+}
+
+.barColumn {
+  cursor: pointer;
+}
+
+.barCapacity {
+  transition: fill 0.18s ease;
+}
+
+.barRegistered {
+  transition: opacity 0.18s ease, filter 0.18s ease;
+}
+
+.barColumn:hover .barCapacity {
+  fill: #cbd5e1;
+}
+
+.barColumn:hover .barRegistered {
+  filter: brightness(1.08);
+}
+
+.chartTooltipGroup {
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}

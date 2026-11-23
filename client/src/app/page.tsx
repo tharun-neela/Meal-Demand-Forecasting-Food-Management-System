@@ -131,6 +131,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.authorizedRole || (data.message && data.message.includes("RBAC Access Denied"))) {
+          throw new Error("Please select correct role");
+        }
         throw new Error(data.message || "Authentication failed.");
       }
 

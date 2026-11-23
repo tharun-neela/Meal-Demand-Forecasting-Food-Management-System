@@ -6,10 +6,10 @@
   background-color: #ffffff;
 }
 
-/* Left Sidebar - Deep Enterprise Slate with LPU Orange Accents (Kitchen Staff Touch Friendly) */
+/* Left Sidebar - Executive Slate Side Panel (Previous Colors Restored) */
 .sidebar {
-  width: 305px;
-  min-width: 305px;
+  width: 272px;
+  min-width: 272px;
   height: 100vh;
   position: sticky;
   top: 0;
@@ -19,82 +19,88 @@
   border-right: 1px solid #1e293b;
   z-index: 50;
   overflow: hidden;
-  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Collapsed Mini-Rail State: Large 56x56 touch targets remain visible! */
 .sidebarCollapsed {
-  width: 82px !important;
-  min-width: 82px !important;
+  width: 74px !important;
+  min-width: 74px !important;
 }
 
-/* Sidebar Header */
-.sidebarHeader {
-  padding: 1.15rem 1.25rem;
+/* Profile Header (Dr. Neeraj Kumar, Mess Administrator) */
+.profileHeader {
+  padding: 1.15rem 1rem 1rem 1.15rem;
   border-bottom: 1px solid #1e293b;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.85rem;
-}
-
-.sidebarCollapsed .sidebarHeader {
-  flex-direction: column;
-  padding: 1rem 0.5rem;
   gap: 0.75rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.collapsedHeaderContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.brandGroup {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  overflow: hidden;
-}
-
-.logoImage {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
+  background-color: #0f172a;
   flex-shrink: 0;
 }
 
-.brandText {
+.profileInfoGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.profileAvatarCircle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #f36f21;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(243, 111, 33, 0.35);
+  user-select: none;
+  letter-spacing: 0.02em;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+}
+
+.profileMetaText {
   display: flex;
   flex-direction: column;
-  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1.25;
 }
 
-.brandTitle {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #f8fafc;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-.brandBadge {
-  font-size: 0.82rem;
+.profileAdminName {
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #f36f21;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Toggle Collapse/Expand Button (Big & Easy to Tap) */
+.profileAdminRole {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 450;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* Toggle Collapse/Expand Button */
 .toggleBtn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
   background-color: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #cbd5e1;
   cursor: pointer;
   display: flex;
@@ -108,134 +114,176 @@
   background-color: #f36f21;
   border-color: #f36f21;
   color: #ffffff;
-  transform: scale(1.05);
 }
 
-/* Navigation Area without Scrollbar */
+/* Navigation Scrollable Area */
 .navSection {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0.75rem 0.85rem;
+  padding: 0.4rem 0.65rem 1.75rem 0.65rem;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  gap: 0.15rem;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
 }
 
 .navSection::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+  width: 4px;
+}
+
+.navSection::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.navSection::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+.navSection::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
 .sidebarCollapsed .navSection {
-  padding: 0.75rem 0.4rem;
+  padding: 0.5rem 0.4rem;
   align-items: center;
-  gap: 0.45rem;
 }
 
-/* Navigation Links - Full Width, Big Text, High Contrast for Kitchen/Gloved Use */
-.navItem {
+.navGroupContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Category Section Label */
+.sectionTitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  padding: 0.85rem 0.65rem 0.3rem 0.65rem;
+  user-select: none;
+  line-height: 1.2;
+}
+
+.sidebarCollapsed .sectionTitle {
+  display: none;
+}
+
+.groupDivider {
+  height: 1px;
+  background-color: #1e293b;
+  margin: 0.65rem 0.5rem 0.2rem 0.5rem;
+  border: none;
+}
+
+.sidebarCollapsed .groupDivider {
+  width: 32px;
+  margin: 0.5rem auto;
+}
+
+/* Nav Item Link */
+.panelItem {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
   box-sizing: border-box;
-  min-height: 52px;
-  padding: 0.85rem 1.1rem;
-  border-radius: 10px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #f1f5f9;
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  padding: 0.52rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 450;
+  color: #cbd5e1;
   text-decoration: none;
-  transition: all 0.16s ease;
+  transition: background-color 0.14s ease, color 0.14s ease;
   user-select: none;
   white-space: nowrap;
-  position: relative;
+  border: 1px solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+  text-align: left;
+  min-height: 38px;
 }
 
-.sidebarCollapsed .navItem {
+.panelItem:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.panelItemActive {
+  background-color: #f36f21 !important;
+  border-color: #ff8533 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 14px rgba(243, 111, 33, 0.35) !important;
+}
+
+.panelItemDanger {
+  color: #f87171 !important;
+}
+
+.panelItemDanger:hover {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.sidebarCollapsed .panelItem {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   padding: 0;
-  width: 56px;
-  height: 56px;
-  min-height: 56px;
   justify-content: center;
   gap: 0;
   margin: 0 auto;
-  border-radius: 10px;
+  border-radius: 8px;
+  position: relative;
 }
 
-.navItem:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  transform: translateX(2px);
-}
-
-.sidebarCollapsed .navItem:hover {
-  transform: scale(1.06);
-}
-
-.navItemActive {
-  background: #f36f21 !important;
-  border-color: #ff8533 !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 16px rgba(243, 111, 33, 0.45) !important;
-}
-
-.navIcon {
-  width: 26px;
-  height: 26px;
+.panelIcon {
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #cbd5e1;
-  transition: color 0.15s ease;
+  color: inherit;
 }
 
-.navItem:hover .navIcon {
-  color: #ffffff;
-}
-
-.navItemActive .navIcon {
-  color: #ffffff !important;
-}
-
-.navLabel {
+.panelLabel {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Sidebar Footer (Student Profile & Logout - Large Tap Targets) */
-.sidebarFooter {
-  padding: 0.9rem 1rem;
-  border-top: 1px solid #1e293b;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  background-color: #0b1120;
-}
-
-.sidebarCollapsed .sidebarFooter {
-  padding: 0.9rem 0.4rem;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.userCard {
+/* Notification badge */
+.navBlueBadge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background-color: #f36f21;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  overflow: hidden;
+  justify-content: center;
+  margin-left: auto;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+.sidebarCollapsed .navBlueBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 14px;
+  height: 14px;
+  font-size: 0.58rem;
 }
 
 .sidebarCollapsed .userCard {
@@ -401,29 +449,29 @@
 .topNavRight {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.75rem;
   flex-shrink: 0;
 }
 
-/* 1. Modern Search Bar */
+/* 1. Compact Modern Search Bar */
 .searchBarWrapper {
   position: relative;
   display: flex;
   align-items: center;
-  width: 440px;
+  width: 250px;
 }
 
 .searchInput {
   width: 100%;
-  height: 42px;
-  border-radius: 10px;
+  height: 38px;
+  border-radius: 9px;
   background-color: #f8fafc;
   border: 1.5px solid #e2e8f0;
-  padding: 0 2.4rem 0 2.5rem;
-  font-size: 0.92rem;
+  padding: 0 3.8rem 0 2.25rem;
+  font-size: 0.88rem;
   color: #0f172a;
   outline: none;
-  transition: all 0.18s ease;
+  transition: all 0.16s ease;
   font-family: inherit;
 }
 
@@ -435,14 +483,13 @@
 .searchInput:focus,
 .searchInput:focus-visible {
   background-color: #ffffff;
-  border-color: #e2e8f0;
-  outline: none;
-  box-shadow: none;
+  border-color: #cbd5e1;
+  box-shadow: 0 0 0 3px rgba(243, 111, 33, 0.08);
 }
 
 .searchIcon {
   position: absolute;
-  left: 0.85rem;
+  left: 0.75rem;
   pointer-events: none;
   color: #94a3b8;
   display: flex;
@@ -451,15 +498,87 @@
 
 .searchShortcutPill {
   position: absolute;
-  right: 0.65rem;
+  right: 0.45rem;
   font-size: 0.7rem;
   font-weight: 600;
   color: #64748b;
-  background-color: #e2e8f0;
-  border-radius: 4px;
-  padding: 0.15rem 0.4rem;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.12rem 0.42rem;
   pointer-events: none;
   letter-spacing: 0.02em;
+}
+
+/* 2. Top Nav Icon Buttons (Sun Theme & Bell Notification) */
+.topNavIconButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.topNavIconButton:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.topNavDivider {
+  width: 1px;
+  height: 26px;
+  background-color: #e2e8f0;
+  margin: 0 0.25rem;
+  flex-shrink: 0;
+}
+
+/* 3. Institution Text & Round Logo */
+.topNavInstitution {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.institutionInfoText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.institutionUniversityName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.institutionPortalRole {
+  font-size: 0.78rem;
+  font-weight: 450;
+  color: #64748b;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.topNavRoundLogo {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: contain;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .searchClearBtn {
@@ -603,13 +722,15 @@
 
 .notificationDot {
   position: absolute;
-  top: 7px;
-  right: 7px;
-  width: 9px;
-  height: 9px;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background-color: #f36f21;
   border: 2px solid #ffffff;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(243, 111, 33, 0.4);
 }
 
 .notificationBadge {

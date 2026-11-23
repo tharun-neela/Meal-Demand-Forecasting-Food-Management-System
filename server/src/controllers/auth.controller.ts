@@ -35,7 +35,7 @@ export const login = async (req: Request, res: Response) => {
     if (user.role !== (role as UserRole)) {
       return res.status(403).json({
         success: false,
-        message: `RBAC Access Denied: User "${user.userId}" is authorized only as "${user.role}", but attempted to login with the "${role}" role.`,
+        message: 'Please select correct role',
         authorizedRole: user.role,
         attemptedRole: role,
       });
