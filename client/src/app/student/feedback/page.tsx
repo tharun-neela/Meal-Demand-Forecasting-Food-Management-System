@@ -247,6 +247,11 @@ export default function FeedbackPage() {
 
     const newRecord = {
       id: `fb-${Date.now()}`,
+      studentId: "12104523",
+      studentName: "Aarav Sharma",
+      studentHostel: "BH-01, Room 314",
+      hallId: "bh-01",
+      hallName: "BH-01 Mess",
       mealType: selectedMeal,
       mealName,
       dateKey: todayDayInfo.dateKey,
@@ -263,6 +268,7 @@ export default function FeedbackPage() {
         dataUrl: p.dataUrl,
       })),
       submittedAt: `Today, ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+      status: "pending",
     };
 
     try {
